@@ -6,13 +6,13 @@
       <v-list-item-content>
         <v-icon size="100">mdi-account</v-icon>
         <v-list-item-title>
-          Welcome, Prannaya!
+          Welcome, {{username}}!
         </v-list-item-title>
       </v-list-item-content>
     </v-list-item>
     <v-divider></v-divider>
     <v-list dense nav>
-      <router-link v-for="item in routes" :to="item.path" @click="drawerShown = false"
+      <router-link v-for="item in drawerRoutes" :to="item.path" @click="drawerShown = false"
         style="text-decoration: none; color: inherit;" :key="item.name">
         <v-list-item link>
           <v-list-item-icon>
@@ -52,19 +52,19 @@
                     style="margin: 15px 15px 0 20px; display: block" /> -->
   </v-app-bar>
 
-  <v-app-bar v-else app dense fixed dark shrink-on-scroll prominent fade-img-on-scroll :height="height" :src="this.img"
-    alt class="icon" :key="this.img" :class="imgIsLoaded ? 'show,display' : 'display'" loading="lazy" @load="imgLoaded">
-    <v-container fill-width :fill-height="!this.hideSubtitle" fluid>
+  <v-app-bar v-else app dense fixed dark shrink-on-scroll prominent fade-img-on-scroll :height="height" :src="img"
+    alt class="icon" :key="img" :class="imgIsLoaded ? 'show,display' : 'display'" loading="lazy" @load="imgLoaded">
+    <v-container fill-width :fill-height="!hideSubtitle" fluid>
       <v-row align="center" justify="center">
-        <v-col :align="(this.hideSubtitle) ? 'left' : 'center'" justify="center">
+        <v-col :align="(hideSubtitle) ? 'left' : 'center'" justify="center">
           <v-toolbar-title class="text-wrap" :style="{ padding: 0, color: 'white', 'font-weight': 500 }">
-            <span :style="{ 'font-size': Math.max((width < 333 ? 0.75 : 1) * this.font, 1) + 'em' }">arXiv.nush</span>
-            <span v-if="!this.hideSubtitle" class="text-wrap" :style="{ 'font-size': Math.min(1, this.font) + 'em' }">
+            <span :style="{ 'font-size': Math.max((width < 333 ? 0.75 : 1) * font, 1) + 'em' }">arXiv.nush</span>
+            <span v-if="!hideSubtitle" class="text-wrap" :style="{ 'font-size': Math.min(1, font) + 'em' }">
               <br>
               Explore Research@NUSH like never before.
             </span>
           </v-toolbar-title>
-          <a v-if="!this.hideSubtitle" href="#" v-scroll-to="'#intro'" class="back-to-top">
+          <a v-if="!hideSubtitle" href="#" v-scroll-to="'#intro'" class="back-to-top">
             <v-icon>mdi-arrow-down</v-icon>
           </a>
         </v-col>
@@ -168,109 +168,114 @@
 </v-app>
 </template>
 
-<script lang="ts">
-import Vue from "vue";
+<script lang="ts" setup>
+import {
+  computed,
+  nextTick,
+  onMounted,
+  ref,
+  watch,
+  type ComputedRef,
+  type Ref,
+  type WritableComputedRef,
+} from 'vue';
+import { useTheme } from 'vuetify/lib/framework.mjs';
 
-export default Vue.extend({
-  name: "App",
-  components: {},
-  data() {
-    return {
-      loggedIn: true,
-      drawerShown: false,
-      username: "",
-      password: "",
-      showPassword: false,
-      font: window.innerWidth < 1000 ? 3 * 0.75 : 3,
-      hideSubtitle: false,
-      imgIsLoaded: false,
-      img: "img/books.jpg",
-      tab: null,
-      loginItems: ["Login", "Register"],
-      routes: [
-        {
-          name: "Home",
-          path: "/",
-          icon: "mdi-home",
-        },
-        {
-          name: "Dashboard",
-          path: "/projects",
-          icon: "mdi-file-table-box",
-        },
-        {
-          name: "GitHub Tracker",
-          path: "/github",
-          icon: "mdi-github",
-        },
-        {
-          name: "SSEF Tracker",
-          path: "/ssef",
-          icon: "mdi-flask",
-        },
-        {
-          name: "Profile",
-          path: "/users/h1810124",
-          icon: "mdi-account"
-        },
-        {
-          name: "Contact Us",
-          path: "/contact",
-          icon: "mdi-email"
-        }
-      ]
-    };
+import router from "./router";
+
+
+/** Vuetify Theme */
+const theme = useTheme();
+
+/** drawer visibility */
+const drawerShown: Ref<boolean> = ref(false);
+
+/** drawer visibility */
+const loggedIn: Ref<boolean> = ref(false);
+
+const username: Ref<string> = ref("");
+const password: Ref<string> = ref("");
+
+const showPassword: Ref<boolean> = ref(false);
+
+
+const font: Ref<number> = ref(window.innerWidth < 1000 ? 3 * 0.75 : 3);
+const hideSubtitle: Ref<boolean> = ref(false);
+
+const img: Ref<string> = ref("img/books.jpg");
+const imgIsLoaded: Ref<boolean> = ref(false);
+
+const tab: Ref<string | null> = ref(null);
+
+const loginItems = ["Login", "Register"];
+
+
+const drawerRoutes = [
+  {
+    name: "Home",
+    path: "/",
+    icon: "mdi-home",
   },
-  methods: {
-    login() {
-      console.log(`Username: ${this.username}`);
-      console.log(`Password: ${this.password}`);
-      if (this.username == "root" && this.password == "admin") {
-        console.log("Logged In Successfully!");
-        this.loggedIn = true;
-      }
-      this.$router.push("/");
-    },
-    register() {
-      console.log(`Username: ${this.username}`);
-      console.log(`Password: ${this.password}`);
-      console.log("Registered Successfully!");
-      this.loggedIn = true;
-      this.$router.push("/");
-    },
-    logout() {
-      this.username = "";
-      this.password = "";
-      this.loggedIn = false;
-      this.$router.push("/");
-      this.drawerShown = false;
-    },
-    onScroll() {
-      if (window.scrollY > this.height * 0.8) {
-        this.font = 1;
-        this.hideSubtitle = true;
-      } else {
-        this.font = 3;
-        this.hideSubtitle = false;
-      }
-      if (this.width < 1000) {
-        this.font *= 0.75;
-      }
-    },
-    imgLoaded() {
-      this.imgIsLoaded = true;
-    }
+  {
+    name: "Dashboard",
+    path: "/projects",
+    icon: "mdi-file-table-box",
   },
-  computed: {
-    height() {
-      return window.innerHeight;
-    },
-    width() {
-      return window.innerWidth;
-    },
+  {
+    name: "GitHub Tracker",
+    path: "/github",
+    icon: "mdi-github",
   },
-  mounted() {
-    window.addEventListener("scroll", this.onScroll);
+  {
+    name: "SSEF Tracker",
+    path: "/ssef",
+    icon: "mdi-flask",
+  },
+  {
+    name: "Profile",
+    path: "/users/h1810124",
+    icon: "mdi-account"
+  },
+  {
+    name: "Contact Us",
+    path: "/contact",
+    icon: "mdi-email"
   }
-});
+]
+
+function login() {
+  console.log(`Username: ${username.value}`);
+  console.log(`Password: ${password.value}`);
+  if (username.value == "root" && password.value == "admin") {
+    console.log("Logged In Successfully!");
+    loggedIn.value = true;
+  }
+  router.push("/");
+}
+function register() {
+  console.log(`Username: ${username.value}`);
+  console.log(`Password: ${password.value}`);
+  console.log("Registered Successfully!");
+  loggedIn.value = true;
+  router.push("/");
+}
+function logout() {
+  username.value = "";
+  password.value = "";
+  loggedIn.value = false;
+  router.push("/");
+  drawerShown.value = false;
+}
+
+function imgLoaded() {
+  imgIsLoaded.value = true;
+}
+
+const height: ComputedRef<number> = computed(
+  () => window.innerHeight
+);
+
+const width: ComputedRef<number> = computed(
+  () => window.innerWidth
+);
 </script>
