@@ -1,171 +1,61 @@
 <template>
-<v-app>
-  <!-- Navigation Drawer! -->
-  <v-navigation-drawer v-if="loggedIn" v-model="drawerShown" temporary app>
-    <v-list-item>
-      <v-list-item-content>
-        <v-icon size="100">mdi-account</v-icon>
-        <v-list-item-title>
-          Welcome, Prannaya!
-        </v-list-item-title>
-      </v-list-item-content>
-    </v-list-item>
-    <v-divider></v-divider>
-    <v-list dense nav>
-      <router-link v-for="item in routes" :to="item.path" @click="drawerShown = false"
-        style="text-decoration: none; color: inherit;" :key="item.name">
-        <v-list-item link>
-          <v-list-item-icon>
-            <v-icon>{{ item.icon }}</v-icon>
-          </v-list-item-icon>
+  <v-app>
+    <v-navigation-drawer
+      v-if="user != null"
+      v-model="drawerShown"
+      temporary app>
 
-          <v-list-item-content>
-            <v-list-item-title>
-              {{ item.name }}
-            </v-list-item-title>
-          </v-list-item-content>
-        </v-list-item>
-        <v-divider />
-      </router-link>
-      <v-list-item @click="logout()" color="primary">
-        <v-list-item-icon>
-          <v-icon>mdi-account-cancel</v-icon>
-        </v-list-item-icon>
-
-        <v-list-item-content color="primary">
+      <v-list-item>
+        <v-list-item-content>
+          <v-icon size="100">mdi-account</v-icon>
           <v-list-item-title>
-            Logout
+            Welcome, {{ user.name }}!
           </v-list-item-title>
         </v-list-item-content>
       </v-list-item>
-      <v-divider />
-    </v-list>
-  </v-navigation-drawer>
 
-  <v-app-bar v-if="loggedIn" app color="primary" dark>
-    <v-app-bar-nav-icon v-if="loggedIn" @click="drawerShown = !drawerShown"></v-app-bar-nav-icon>
-    <v-toolbar-title>
-      arXiv.nush
-    </v-toolbar-title>
-    <!-- <v-spacer></v-spacer><v-btn color="primary" @click="logout()">Logout</v-btn> -->
-    <!-- <v-switch v-model="$vuetify.theme.dark" color="orange" label="Dark Mode"
-                    style="margin: 15px 15px 0 20px; display: block" /> -->
-  </v-app-bar>
-
-  <v-app-bar v-else app dense fixed dark shrink-on-scroll prominent fade-img-on-scroll :height="height" :src="this.img"
-    alt class="icon" :key="this.img" :class="imgIsLoaded ? 'show,display' : 'display'" loading="lazy" @load="imgLoaded">
-    <v-container fill-width :fill-height="!this.hideSubtitle" fluid>
-      <v-row align="center" justify="center">
-        <v-col :align="(this.hideSubtitle) ? 'left' : 'center'" justify="center">
-          <v-toolbar-title class="text-wrap" :style="{ padding: 0, color: 'white', 'font-weight': 500 }">
-            <span :style="{ 'font-size': Math.max((width < 333 ? 0.75 : 1) * this.font, 1) + 'em' }">arXiv.nush</span>
-            <span v-if="!this.hideSubtitle" class="text-wrap" :style="{ 'font-size': Math.min(1, this.font) + 'em' }">
-              <br>
-              Explore Research@NUSH like never before.
-            </span>
-          </v-toolbar-title>
-          <a v-if="!this.hideSubtitle" href="#" v-scroll-to="'#intro'" class="back-to-top">
-            <v-icon>mdi-arrow-down</v-icon>
-          </a>
-        </v-col>
-      </v-row>
-    </v-container>
-  </v-app-bar>
-
-
-  <!-- <v-app-bar app color="primary" dark>
-                <v-app-bar-nav-icon v-if="loggedIn" @click="drawerShown = !drawerShown"></v-app-bar-nav-icon>
-                <v-toolbar-title>
-                    The Interface
-                </v-toolbar-title>
-            </v-app-bar> -->
-
-  <v-main v-if="loggedIn">
-    <router-view />
-  </v-main>
-  <v-main v-else :style="{ 'margin-top': height + 'px', minHeight: height + 'px' }">
-    <v-container fluid fill-height fill-width align="center" justify="center" id="intro">
-      <v-row align="center" justify="center">
-        <v-col align="center" justify="center" cols="24" sm="8">
-          <span>
-            <span style="font-size: 2em">
-              Welcome to arXiv.nush!
-            </span><br>
-            This platform aims to help students consolidate their research
-            projects on a proper platform. <br><br>
-            Perform Research, the real way!
-          </span>
-          <v-tabs grow center-active v-model="tab" background-color="transparent">
-            <v-tab v-for="item in loginItems" :key="item">
-              {{ item }}
-            </v-tab>
-          </v-tabs>
-          <v-tabs-items v-model="tab">
-            <v-tab-item :key="'Login'">
-              <v-form ref="form" lazy-validation>
-                <v-row align="center" justify="center" class="ma-4">
-                  <v-col cols="12" sm="4">
-                    <h3>Username</h3>
-                    <v-text-field x-large v-model="username" placeholder="Your Username" hint="root" required>
-                    </v-text-field>
-                    <v-spacer />
-                  </v-col>
-                  <v-col cols="12" sm="4">
-                    <h3>Password</h3>
-                    <v-text-field x-large v-model="password" placeholder="Password"
-                      :type="showPassword ? 'text' : 'password'" :append-icon="showPassword ? 'mdi-eye' : 'mdi-eye-off'"
-                      hint="admin" @click:append="showPassword = !showPassword" required>
-                    </v-text-field>
-                  </v-col>
-                </v-row>
-              </v-form>
-              <v-row align="center" justify="center" class="my-6">
-                <v-btn x-large color="primary" @click="login()">
-                  Login!
-                </v-btn>
-              </v-row>
-            </v-tab-item>
-            <v-tab-item :key="'Register'">
-              <v-form ref="form" lazy-validation>
-                <v-row align="center" justify="center" class="ma-4">
-                  <v-col cols="12" sm="4">
-                    <h3>Username</h3>
-                    <v-text-field x-large v-model="username" placeholder="Your Username" hint="root" required>
-                    </v-text-field>
-                    <v-spacer />
-                  </v-col>
-                  <v-col cols="12" sm="4">
-                    <h3>Password</h3>
-                    <v-text-field x-large v-model="password" placeholder="Password"
-                      :type="showPassword ? 'text' : 'password'" :append-icon="showPassword ? 'mdi-eye' : 'mdi-eye-off'"
-                      hint="admin" @click:append="showPassword = !showPassword" required>
-                    </v-text-field>
-                  </v-col>
-                </v-row>
-              </v-form>
-              <v-row align="center" justify="center" class="my-6">
-                <v-btn x-large color="primary" @click="register()">
-                  Register!
-                </v-btn>
-              </v-row>
-            </v-tab-item>
-          </v-tabs-items>
-        </v-col>
-      </v-row>
-    </v-container>
-  </v-main>
-  <v-footer :padless="true">
-    <v-card dark flat tile width="100%" class="text-center lighten-1">
-      <v-card-text>
-        An app for those who care to question.
-      </v-card-text>
       <v-divider></v-divider>
-      <v-card-text class="white--text">
-        Developed by Prannaya Gupta
-      </v-card-text>
-    </v-card>
-  </v-footer>
-</v-app>
+      <v-list
+        dense
+        nav>
+        <router-link v-for="item in routes"
+                     :to="item.route"
+                     @click="drawerShown = false"
+                     style="text-decoration: none; color: inherit;"
+                     :key="item.name">
+          <v-list-item link>
+            <v-list-item-icon>
+              <v-icon>{{ item.icon }}</v-icon>
+            </v-list-item-icon>
+
+            <v-list-item-content>
+              <v-list-item-title>
+                {{ item.name }}
+              </v-list-item-title>
+            </v-list-item-content>
+          </v-list-item>
+          <v-divider/>
+        </router-link>
+      </v-list>
+    </v-navigation-drawer>
+    <v-app-bar
+      app
+      color="primary"
+      dark
+    >
+      <v-app-bar-nav-icon v-if="user != null"
+                          @click="drawerShown = !drawerShown"/>
+      <v-toolbar-title>
+        TheVueProgrammer
+      </v-toolbar-title>
+      <v-switch v-model="$vuetify.theme.dark" color="orange" label="Dark Mode"
+                style="margin: 15px 15px 0 20px; display: block"/>
+    </v-app-bar>
+
+    <v-content>
+      <router-view/>
+    </v-content>
+  </v-app>
 </template>
 
 <script lang="ts">
@@ -174,103 +64,52 @@ import Vue from "vue";
 export default Vue.extend({
   name: "App",
   components: {},
-  data() {
-    return {
-      loggedIn: true,
-      drawerShown: false,
-      username: "",
-      password: "",
-      showPassword: false,
-      font: window.innerWidth < 1000 ? 3 * 0.75 : 3,
-      hideSubtitle: false,
-      imgIsLoaded: false,
-      img: "img/books.jpg",
-      tab: null,
-      loginItems: ["Login", "Register"],
-      routes: [
+  data: () => ({
+    drawerShown: false,
+    user: {
+      name: "Prannaya",
+    }
+  }),
+  computed: {
+    routes(): Array<{
+      name: string;
+      route: string;
+      icon: string;
+    }> {
+      // Add routes here to correspond to router.ts
+      return [
         {
           name: "Home",
-          path: "/",
-          icon: "mdi-home",
+          route: "/",
+          icon: "mdi-home-variant",
         },
         {
-          name: "Dashboard",
-          path: "/projects",
-          icon: "mdi-file-table-box",
-        },
-        {
-          name: "GitHub Tracker",
-          path: "/github",
+          name: "GitHub",
+          route: "/github",
           icon: "mdi-github",
         },
         {
-          name: "SSEF Tracker",
-          path: "/ssef",
-          icon: "mdi-flask",
+          name: "ISS",
+          route: "/iss",
+          icon: "mdi-space-station",
         },
         {
-          name: "Profile",
-          path: "/users/h1810124",
-          icon: "mdi-account"
+          name: "Jokes!",
+          route: "/jokes",
+          icon: "mdi-code-not-equal-variant",
         },
         {
-          name: "Contact Us",
-          path: "/contact",
-          icon: "mdi-email"
+          name: "Quotes",
+          route: "/quotes",
+          icon: "mdi-format-quote-open",
+        },
+        {
+          name: "News",
+          route: "/news",
+          icon: "mdi-newspaper",
         }
-      ]
-    };
-  },
-  methods: {
-    login() {
-      console.log(`Username: ${this.username}`);
-      console.log(`Password: ${this.password}`);
-      if (this.username == "root" && this.password == "admin") {
-        console.log("Logged In Successfully!");
-        this.loggedIn = true;
-      }
-      this.$router.push("/");
+      ];
     },
-    register() {
-      console.log(`Username: ${this.username}`);
-      console.log(`Password: ${this.password}`);
-      console.log("Registered Successfully!");
-      this.loggedIn = true;
-      this.$router.push("/");
-    },
-    logout() {
-      this.username = "";
-      this.password = "";
-      this.loggedIn = false;
-      this.$router.push("/");
-      this.drawerShown = false;
-    },
-    onScroll() {
-      if (window.scrollY > this.height * 0.8) {
-        this.font = 1;
-        this.hideSubtitle = true;
-      } else {
-        this.font = 3;
-        this.hideSubtitle = false;
-      }
-      if (this.width < 1000) {
-        this.font *= 0.75;
-      }
-    },
-    imgLoaded() {
-      this.imgIsLoaded = true;
-    }
-  },
-  computed: {
-    height() {
-      return window.innerHeight;
-    },
-    width() {
-      return window.innerWidth;
-    },
-  },
-  mounted() {
-    window.addEventListener("scroll", this.onScroll);
   }
 });
 </script>

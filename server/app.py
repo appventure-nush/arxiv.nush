@@ -1,37 +1,92 @@
-from flask import Flask, request
-import tensorflow as tf
+from flask import Flask, request, jsonify
+import pandas as pd
+from pandasql import sqldf
+
+nush_students = pd.read_csv("data/nush_students.csv")
+nush_teachers = pd.read_csv("data/nush_teachers.csv")
+projects = pd.read_csv("data/projects.csv")
+works_on = pd.read_csv("data/works_on.csv")
 
 app = Flask(__name__)
 
-def read(filename):
-    text = ""
-    with open(filename) as file: text = file.read()
-    return text
+
+def getStudentDetails(email):
+    res = sqldf(
+        f"""
+        SELECT *
+        FROM nush_students
+        WHERE email = '{email}'
+        """
+    ).iloc[0].to_dict()
+    res["graduationYear"] = int(res["graduationYear"])
+    return res
+
+def getProjects(email):
+    projects = sqldf(
+        f"""
+        SELECT *
+        FROM projects
+        WHERE "{email}" in (
+            SELECT studentEmail
+            FROM works_on
+            WHERE works_on.pcode = projects.pcode
+        )
+        """
+    ).to_dict('records')
+
+@app.route("/projectsByStudent", methods=["GET"])
+def projectsByStudent():
+    email = request.args.get("email@nushigh.edu.sg", "h1810124", str)
+    res = jsonify(list(sqldf(
+        f"""
+        SELECT *
+        FROM projects NATURAL JOIN works_on
+        WHERE "{email}" in (
+            SELECT studentEmail
+            FROM works_on
+            WHERE works_on.pcode = projects.pcode
+        )
+        """
+    ).groupby(["pcode", "title", "teacherEmail", "year"]).studentEmail.agg(list).reset_index().T.to_dict().values()))
+    res.headers.add('Access-Control-Allow-Origin', '*')
+    return res
 
 
-tokenizer = tf.keras.preprocessing.text.tokenizer_from_json(read("models/tokenizer.json"))
+@app.route("/student", methods=["GET"])
+def student():
+    email = request.args.get("email", "h1810124@nushigh.edu.sg", str)
+    res = sqldf(
+        f"""
+        SELECT *
+        FROM nush_students
+        WHERE email = '{email}'
+        """
+    ).iloc[0].to_dict()
+    res["graduationYear"] = int(res["graduationYear"])
+    res = jsonify(res)
+    res.headers.add('Access-Control-Allow-Origin', '*')
+    return res
 
-model = tf.keras.Sequential([
-    tf.keras.layers.Embedding(2000, 64), # embedding layer
-    tf.keras.layers.Bidirectional(tf.keras.layers.LSTM(64, dropout=0.2, recurrent_dropout=0.2)), # LSTM layer
-    tf.keras.layers.Dropout(rate=0.2), # dropout layer
-    tf.keras.layers.Dense(64, activation='relu'), # fully connected layer
-    tf.keras.layers.Dense(4, activation='sigmoid') # final layer
-])
 
-model.load_weights("models/mbti-bdlstm.h5")
+@app.route("/teacher", methods=["GET"])
+def teacher():
+    email = request.args.get("email", "nhscsp@nushigh.edu.sg", str)
+    res = sqldf(
+        f"""
+        SELECT *
+        FROM nush_teachers
+        WHERE email = '{email}'
+        """
+    ).iloc[0].to_dict()
+    res = jsonify(res)
+    res.headers.add('Access-Control-Allow-Origin', '*')
+    return res
+
 
 @app.route('/')
 def hello_world():
     return '<h1>Hello World!</h1>'
 
-@app.route("/mbti", methods=["GET"])
-def mbti():
-    text = request.args.get("text")
-    ei, sn, ft, jp = model.predict(tf.keras.preprocessing.sequence.pad_sequences(tokenizer.texts_to_sequences([text]), maxlen=100, padding='post', truncating='post')).round().astype(int)[0]
-    print("IE"[ei]+"NS"[sn]+"TF"[ft]+"PJ"[jp])
-    return "IE"[ei]+"NS"[sn]+"TF"[ft]+"PJ"[jp]
-
 
 if __name__ == '__main__':
-    app.run()
+    app.run(host="127.0.0.1", port=5000, debug=True)

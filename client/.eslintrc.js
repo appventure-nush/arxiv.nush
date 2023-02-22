@@ -15,6 +15,7 @@ module.exports = {
     "no-console": process.env.NODE_ENV === "production" ? "warn" : "off",
     "no-debugger": process.env.NODE_ENV === "production" ? "warn" : "off",
     quotes: ["error", "double", {allowTemplateLiterals: true}],
+    "vue/valid-v-slot": ["error", {"allowModifiers": true}],
     semi: "error",
   },
 };
