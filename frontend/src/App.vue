@@ -2,43 +2,26 @@
 <v-app>
   <!-- Navigation Drawer! -->
   <v-navigation-drawer v-if="loggedIn" v-model="drawerShown" temporary app>
-    <v-list-item>
-      <v-list-item-content>
-        <v-icon size="100">mdi-account</v-icon>
-        <v-list-item-title>
-          Welcome, {{username}}!
-        </v-list-item-title>
-      </v-list-item-content>
-    </v-list-item>
-    <v-divider></v-divider>
     <v-list dense nav>
+      <v-list-item>
+        <v-icon size="100">mdi-account</v-icon>
+        <h2>
+          Welcome, {{username}}!
+        </h2>
+      </v-list-item>
+      <v-divider></v-divider>
       <router-link v-for="item in drawerRoutes" :to="item.path" @click="drawerShown = false"
         style="text-decoration: none; color: inherit;" :key="item.name">
-        <v-list-item link>
-          <v-list-item-icon>
-            <v-icon>{{ item.icon }}</v-icon>
-          </v-list-item-icon>
-
-          <v-list-item-content>
-            <v-list-item-title>
-              {{ item.name }}
-            </v-list-item-title>
-          </v-list-item-content>
+        <v-list-item link :title="item.name" :prepend-icon="item.icon">
         </v-list-item>
         <v-divider />
       </router-link>
-      <v-list-item @click="logout()" color="primary">
-        <v-list-item-icon>
-          <v-icon>mdi-account-cancel</v-icon>
-        </v-list-item-icon>
-
-        <v-list-item-content color="primary">
-          <v-list-item-title>
-            Logout
-          </v-list-item-title>
-        </v-list-item-content>
+      <v-list-item
+      @click="logout()"
+      prepend-icon="mdi-account-cancel"
+      title="Logout"
+      color="primary">
       </v-list-item>
-      <v-divider />
     </v-list>
   </v-navigation-drawer>
 
@@ -47,13 +30,10 @@
     <v-toolbar-title>
       arXiv.nush
     </v-toolbar-title>
-    <!-- <v-spacer></v-spacer><v-btn color="primary" @click="logout()">Logout</v-btn> -->
-    <!-- <v-switch v-model="$vuetify.theme.dark" color="orange" label="Dark Mode"
-                    style="margin: 15px 15px 0 20px; display: block" /> -->
   </v-app-bar>
 
-  <v-app-bar v-else app dense fixed dark shrink-on-scroll prominent fade-img-on-scroll :height="height" :src="img"
-    alt class="icon" :key="img" :class="imgIsLoaded ? 'show,display' : 'display'" loading="lazy" @load="imgLoaded">
+  <v-app-bar v-else app dense fixed dark shrink-on-scroll prominent fade-img-on-scroll :height="height" src="@/assets/books.jpg"
+    alt class="icon" key="@/assets/books.jpg" :class="imgIsLoaded ? 'show,display' : 'display'" loading="lazy" @load="imgLoaded">
     <v-container fill-width :fill-height="!hideSubtitle" fluid>
       <v-row align="center" justify="center">
         <v-col :align="(hideSubtitle) ? 'left' : 'center'" justify="center">
@@ -64,9 +44,9 @@
               Explore Research@NUSH like never before.
             </span>
           </v-toolbar-title>
-          <a v-if="!hideSubtitle" href="#" v-scroll-to="'#intro'" class="back-to-top">
+          <!-- <a v-if="!hideSubtitle" href="#" v-scroll-to="'#intro'" class="back-to-top">
             <v-icon>mdi-arrow-down</v-icon>
-          </a>
+          </a> -->
         </v-col>
       </v-row>
     </v-container>
@@ -183,6 +163,10 @@ import { useTheme } from 'vuetify/lib/framework.mjs';
 
 import router from "./router";
 
+import books from "@/assets/books.jpg";
+
+console.log(books);
+
 
 /** Vuetify Theme */
 const theme = useTheme();
@@ -191,7 +175,7 @@ const theme = useTheme();
 const drawerShown: Ref<boolean> = ref(false);
 
 /** drawer visibility */
-const loggedIn: Ref<boolean> = ref(false);
+const loggedIn: Ref<boolean> = ref(true);
 
 const username: Ref<string> = ref("");
 const password: Ref<string> = ref("");
@@ -202,7 +186,7 @@ const showPassword: Ref<boolean> = ref(false);
 const font: Ref<number> = ref(window.innerWidth < 1000 ? 3 * 0.75 : 3);
 const hideSubtitle: Ref<boolean> = ref(false);
 
-const img: Ref<string> = ref("img/books.jpg");
+const img: Ref<string> = ref(books);
 const imgIsLoaded: Ref<boolean> = ref(false);
 
 const tab: Ref<string | null> = ref(null);
