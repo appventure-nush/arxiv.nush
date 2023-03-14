@@ -1,0 +1,100 @@
+email,name,deptId,isAdmin,isMentor
+nhshs@nushigh.edu.sg,Dr Huang Sinong,BI,TRUE,TRUE
+nhslowkl@nushigh.edu.sg,Dr Low Kai Leng,BI,TRUE,TRUE
+nhsskh@nushigh.edu.sg,Dr Seoh Kah Huat Robin,BI,TRUE,TRUE
+nhsthc@nushigh.edu.sg,Dr Tang Hock Chun,BI,TRUE,TRUE
+nhsleesc@nushigh.edu.sg,Mr Lee Siak Cheong,BI,TRUE,TRUE
+nhskalpa@nushigh.edu.sg,Mrs Fernandez Kalpana,BI,TRUE,TRUE
+anhsad@nushigh.edu.sg,Ms Ameryn Dahnia Bte Mohd Zaili,BI,TRUE,TRUE
+nhscjnr@nushigh.edu.sg,Ms Chan Jing-Ning Ruth,BI,TRUE,TRUE
+nhscyf@nushigh.edu.sg,Ms Cheong Yoke Fun,BI,TRUE,TRUE
+nhsfkc@nushigh.edu.sg,Ms Fong Kit Ching,BI,TRUE,TRUE
+nhslsf@nushigh.edu.sg,Ms Lim Suat Fong Valerie,BI,TRUE,TRUE
+nhsnoh@nushigh.edu.sg,Ms Ng Oon Hui,BI,TRUE,TRUE
+anhsrgoh@nushigh.edu.sg,Ms Rachel Goh Hui Qi,BI,TRUE,TRUE
+nhsrt@nushigh.edu.sg,Ms Renata Triani,BI,TRUE,TRUE
+nhswyl@nushigh.edu.sg,Ms Woo Yok Lin Verlyn,BI,TRUE,TRUE
+nhsfssf@nushigh.edu.sg,Dr Flora Soh Shu Fang,CM,TRUE,TRUE
+nhslw@nushigh.edu.sg,Dr Li Wei,CM,TRUE,TRUE
+nhsmjjp@nushigh.edu.sg,Dr Maury Julien Jean Pierre,CM,TRUE,TRUE
+nhssn@nushigh.edu.sg,Dr Seow Nianjia,CM,TRUE,TRUE
+nhstyl@nushigh.edu.sg,Dr Teh Yun Ling,CM,TRUE,TRUE
+nhslkh@nushigh.edu.sg,Mr Lee Kim Hun,CM,TRUE,TRUE
+nhsladr@nushigh.edu.sg,Mr Lew Andrew Delfin Reyes,CM,TRUE,TRUE
+nhsmk@nushigh.edu.sg,Mr Murali Krishnaswamy,CM,TRUE,TRUE
+nhsthw@nushigh.edu.sg,Mr Wong Teck Hee,CM,TRUE,TRUE
+nhsysy@nushigh.edu.sg,Mr Yeo Shyh Yuan Don,CM,TRUE,TRUE
+nhstymg@nushigh.edu.sg,Mrs Khoo-Teo Yew Mei Grace,CM,TRUE,TRUE
+nhstsc@nushigh.edu.sg,Mrs Soong-Tan Seck Cher,CM,TRUE,TRUE
+nhscal@nushigh.edu.sg,Ms Chong Ai Lin,CM,TRUE,TRUE
+nhshxh@nushigh.edu.sg,Ms Huang Huan Xin,CM,TRUE,TRUE
+nhsksb@nushigh.edu.sg,Ms Koh Siok Bee,CM,TRUE,TRUE
+nhslkl@nushigh.edu.sg,Ms Loo Koh Lee,CM,TRUE,TRUE
+nhsnyr@nushigh.edu.sg,Ms Ng Yu Rui,CM,TRUE,TRUE
+nhsplp@nushigh.edu.sg,Ms Pek Lay Pheng,CM,TRUE,TRUE
+nhszj@nushigh.edu.sg,Ms Zhong Jingyi,CM,TRUE,TRUE
+nhscesc@nushigh.edu.sg,Mr Claude Chua Eng Siong,CS,TRUE,TRUE
+nhsld@nushigh.edu.sg,Mr Li Da,CS,TRUE,TRUE
+nhsljyl@nushigh.edu.sg,Mr Lim Jun Yang Leonard,CS,TRUE,TRUE
+nhsncl@nushigh.edu.sg,Mr Ng Chee Loong,CS,TRUE,TRUE
+nhscsp@nushigh.edu.sg,Ms Chew Shuhui Phylliscia,CS,TRUE,TRUE
+nhskyta@nushigh.edu.sg,Mr Alex Kwee Yeow Teck,HU,TRUE,TRUE
+anhsloh@nushigh.edu.sg,Mr Loh Ping Shun,HU,TRUE,TRUE
+anhsczm@nushigh.edu.sg,Mrs Chen Zhaoyan Madeline,HU,TRUE,TRUE
+nhscb@nushigh.edu.sg,Ms Chua Bann,HU,TRUE,TRUE
+anhsipoh@nushigh.edu.sg,Ms Irene Poh,HU,TRUE,TRUE
+nhslic@nushigh.edu.sg,Ms Lim Ing Chieh Rebekah,HU,TRUE,TRUE
+nhstby@nushigh.edu.sg,Ms Tong Boon Yee,HU,TRUE,TRUE
+nhslcl@nushigh.edu.sg,Dr Lee Chan Lye,MA,TRUE,TRUE
+nhscmh@nushigh.edu.sg,Mr Chai Ming Huang Royce,MA,TRUE,TRUE
+nhschany@nushigh.edu.sg,Mr Chan Yu Ming,MA,TRUE,TRUE
+anhs.chm@nushigh.edu.sg,Mr Chen Hong Ming,MA,TRUE,TRUE
+nhscvl@nushigh.edu.sg,Mr Chia Vui Leong,MA,TRUE,TRUE
+nhsjhhj@nushigh.edu.sg,Mr Herman Chua Jia He,MA,TRUE,TRUE
+nhskcm@nushigh.edu.sg,Mr Ku Ching Ming,MA,TRUE,TRUE
+nhslimtc@nushigh.edu.sg,Mr Lim Teck Choow,MA,TRUE,TRUE
+nhslch@nushigh.edu.sg,Mr Low Chin Han,MA,TRUE,TRUE
+nhstbk@nushigh.edu.sg,Mr Tan Boon Keong,MA,TRUE,TRUE
+nhstrf@nushigh.edu.sg,Mr Tan Rui Feng,MA,TRUE,TRUE
+nhswh@nushigh.edu.sg,Mr Wang Haibin,MA,TRUE,TRUE
+nhsgsl@nushigh.edu.sg,MrÂ Goh Shu Liang,MA,TRUE,TRUE
+nhstyhj@nushigh.edu.sg,MrÂ Teoh Yeow Hwee Joel,MA,TRUE,TRUE
+nhsyx@nushigh.edu.sg,Mrs Liu-Ye Xiajuan,MA,TRUE,TRUE
+nhsscl@nushigh.edu.sg,Ms Joyce Seow Chwee Loon,MA,TRUE,TRUE
+nhslsh@nushigh.edu.sg,Ms Lee Sheau Huey,MA,TRUE,TRUE
+nhslqo@nushigh.edu.sg,Ms Ooi Liu Qi,MA,TRUE,TRUE
+nhsjz@nushigh.edu.sg,Ms Jiang Zewei Vivian,MA,TRUE,TRUE
+nhsbrw@nushigh.edu.sg,Dr Bernard Ricardo Widjaja,PH,TRUE,TRUE
+nhsnte@nushigh.edu.sg,Dr Ng Tiong Eng,PH,TRUE,TRUE
+nhslbc@nushigh.edu.sg,Mr Desmond Lim Beng Chong,PH,TRUE,TRUE
+nhshjhk@nushigh.edu.sg,Mr Ho Jun Hao Kenneth,PH,TRUE,TRUE
+nhstj@nushigh.edu.sg,Mr Joseph Tan Jit Bin,PH,TRUE,TRUE
+nhslyh@nushigh.edu.sg,Mr Lim Yeow Heng,PH,TRUE,TRUE
+nhspbh@nushigh.edu.sg,Mr Poh Boon Hor,PH,TRUE,TRUE
+nhsrg@nushigh.edu.sg,Mr Riduwan B Gafoor,PH,TRUE,TRUE
+nhskey@nushigh.edu.sg,Mr Silas Yeem Kai Ean,PH,TRUE,TRUE
+nhssksc@nushigh.edu.sg,Mr Soh Kwan Seng Clifton,PH,TRUE,TRUE
+nhstags@nushigh.edu.sg,Mr Tan Guan Seng,PH,TRUE,TRUE
+nhstsk@nushigh.edu.sg,Mr Tan Soon Kee @ Hariz Tan,PH,TRUE,TRUE
+nhsyxh@nushigh.edu.sg,Mr Yuen Xiang Hao,PH,TRUE,TRUE
+nhsljh@nushigh.edu.sg,Ms Lim Jia Hui,PH,TRUE,TRUE
+nhsllc@nushigh.edu.sg,Ms Lim Li Chen,PH,TRUE,TRUE
+nhstgh@nushigh.edu.sg,Ms Teo Geok Hon Sheryl,PH,TRUE,TRUE
+nhssy@nushigh.edu.sg,Mr Seow Yongli,PH,TRUE,TRUE
+nhsyw@nushigh.edu.sg,Ms Yenny Wijaya,PH,TRUE,TRUE
+nhscs@nushigh.edu.sg,Dr Chiam Sher-Yi,RE,TRUE,TRUE
+nhsaj@nushigh.edu.sg,Mr Andre Jusuf,RE,TRUE,TRUE
+nhsbww@nushigh.edu.sg,Ms Bay Wee Wen,EL,TRUE,TRUE
+nhscarol@nushigh.edu.sg,Ms Caroline Gordon,EL,TRUE,TRUE
+nhslwls@nushigh.edu.sg,Ms Sofia Lau Wen Li,EL,TRUE,TRUE
+nhski@nushigh.edu.sg,Ms Ivy Koo,EL,TRUE,TRUE
+nhscyz@nushigh.edu.sg,Ms Chan Yun-Zhi Eunice,EL,TRUE,TRUE
+nhsbd@nushigh.edu.sg,Ms Beji Dass,EL,TRUE,TRUE
+anhsevxm@nushigh.edu.sg,Ms Esther Vincent Xueming,EL,TRUE,TRUE
+nhseftv@nushigh.edu.sg,Mr Eric Francis Tinsay Valles,EL,TRUE,TRUE
+nhslcs@nushigh.edu.sg,Mr Lim Chong Shen,EL,TRUE,TRUE
+nhsasri@nushigh.edu.sg,Ms Asrina Bte Sani,EL,TRUE,TRUE
+nhsckyd@nushigh.edu.sg,Mr Chin Kiane Yun Dustin,EL,TRUE,TRUE
+nhsclpm@nushigh.edu.sg,Ms Chin Lee Pyin Melissa,EL,TRUE,TRUE
+nhskohm@nushigh.edu.sg,Ms Koh Mei Ying Genette,EL,TRUE,TRUE
+s.yuen@nushigh.edu.sg,Ms Yuen Lilin Sharalee,EL,TRUE,TRUE
