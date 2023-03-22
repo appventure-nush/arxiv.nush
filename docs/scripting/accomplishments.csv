@@ -1,0 +1,41 @@
+﻿accId,isAward,name,prize,eventId,year,code
+1,1,2nd Place,,ISYFdigital,2021,20.022.NUSE.PH
+2,1,Gold Award,S$800 in Popular Vouchers,SSEF,2021,BE018
+3,1,Third Prize,,GYSTB,2021,IBPE07
+4,1,Best Presenters' Award,,IRC-SET,2021,P23
+5,0,,,IRC-SET,2021,P23
+6,1,Bronze Award,S$100 in Popular Vouchers,SSEF,2022,PH008
+7,1,Harry Shum High School Computer Science Gold Award,US$1000,STYau,2022,Comp-129
+8,1,Gold Award,S$400 in Popular Vouchers,SSEF,2023,AS004
+9,1,Gold Award,S$600 in Popular Vouchers,SSEF,2023,BE023
+10,1,Gold Award,S$400 in Popular Vouchers,SSEF,2023,EY010
+11,1,Gold Award,S$600 in Popular Vouchers,SSEF,2023,MA021
+12,1,Gold Award,S$600 in Popular Vouchers,SSEF,2023,PH015
+13,1,Gold Award,S$800 in Popular Vouchers,SSEF,2023,ES005
+14,1,Silver Award,S$375 in Popular Vouchers,SSEF,2023,BE018
+15,1,Silver Award,S$375 in Popular Vouchers,SSEF,2023,BE023
+16,1,Silver Award,S$250 in Popular Vouchers,SSEF,2023,SS024
+17,1,Silver Award,S$375 in Popular Vouchers,SSEF,2023,RO030
+18,1,Silver Award,S$375 in Popular Vouchers,SSEF,2023,MI009
+19,1,Silver Award,S$375 in Popular Vouchers,SSEF,2023,EE002
+20,1,Silver Award,S$375 in Popular Vouchers,SSEF,2023,PH023
+21,1,Silver Award,S$500 in Popular Vouchers,SSEF,2023,BH017
+22,1,Bronze Award,S$300 in Popular Vouchers,SSEF,2023,MI001
+23,1,Bronze Award,S$225 in Popular Vouchers,SSEF,2023,MA019
+24,1,Bronze Award,S$300 in Popular Vouchers,SSEF,2023,EE020
+25,1,Bronze Award,S$150 in Popular Vouchers,SSEF,2023,RO028
+26,1,Bronze Award,S$300 in Popular Vouchers,SSEF,2023,PS022
+27,1,Bronze Award,S$300 in Popular Vouchers,SSEF,2023,BM021
+28,1,Merit Award,S$100 in Popular Vouchers,SSEF,2023,CB018
+29,1,Merit Award,S$100 in Popular Vouchers,SSEF,2023,CB022
+30,1,Merit Award,S$100 in Popular Vouchers,SSEF,2023,MA018
+31,1,Merit Award,S$200 in Popular Vouchers,SSEF,2023,EA007
+32,1,SUTD R&I Award (Healthcare),,SSEF,2023,BE023
+33,1,SAAS Poster Award,,SSEF,2023,BE022
+34,1,SAAS Poster Award,,SSEF,2023,EA007
+35,1,ECS Special Award,,SSEF,2023,EY007
+36,1,SAAS Poster Award,,SSEF,2023,EY007
+37,0,,,Globecom,2023,23.010.SIT_.CS
+38,0,,,NULL,NULL,NULL
+39,0,,,NULL,NULL,NULL
+40,0,,,NULL,NULL,NULL
