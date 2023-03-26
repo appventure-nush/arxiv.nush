@@ -12,41 +12,13 @@ CORS(app)
 database = Database(app)
 
 
-# def getProjects(email):
-#     projects = sqldf(
-#         f"""
-#         SELECT *
-#         FROM projects
-#         WHERE "{email}" in (
-#             SELECT studentEmail
-#             FROM works_on
-#             WHERE works_on.pcode = projects.pcode
-#         )
-#         """
-#     ).to_dict('records')
-
-# @app.route("/projectsByStudent", methods=["GET"])
-# def projectsByStudent():
-#     email = request.args.get("email@nushigh.edu.sg", "h1810124", str)
-#     res = jsonify(list(sqldf(
-#         f"""
-#         SELECT *
-#         FROM projects NATURAL JOIN works_on
-#         WHERE "{email}" in (
-#             SELECT studentEmail
-#             FROM works_on
-#             WHERE works_on.pcode = projects.pcode
-#         )
-#         """
-#     ).groupby(["pcode", "title", "teacherEmail", "year"]).studentEmail.agg(list).reset_index().T.to_dict().values()))
-#     #res.headers.add('Access-Control-Allow-Origin', '*')
-#     return res
 
 
-@app.route("/student", methods=["GET"])
-def student():
-    id = request.args.get("id", "h1810124", str)
-    res = jsonify(database.student(id))
+
+@app.route("/student/<id>", methods=["GET"])
+def student(id):
+    email = ("h1810124" if id == "" else id) + "@nushigh.edu.sg"
+    res = jsonify(database.student(email))
     return res
 
 @app.route("/teacher", methods=["GET"])
@@ -61,19 +33,20 @@ def institute():
     res = jsonify(database.institute(id))
     return res
 
-@app.route("/authors", methods=["GET"])
-def authors():
-    pcode = request.args.get("pcode", "23.018.NUSH.CS", str)
+@app.route("/authors/<pcode>", methods=["GET"])
+def authors(pcode):
+    pcode = "23.018.NUSH.CS" if pcode == "" else pcode
     res = jsonify(database.projectMembers(pcode))
     return res
 
-@app.route("/projects", methods=["GET"])
-def 
+# @app.route("/projects", methods=["GET"])
+# def projects():
+    
 
-@app.route("/coauthors", methods=["GET"])
-def coauthors():
-    email = request.args.get("email", "h1810124@nushigh.edu.sg", str)
-    res = jsonify(database.coauthors(email))
+@app.route("/coauthors/<id>", methods=["GET"])
+def coauthors(id):
+    if(id == ""): id = "h1810124"
+    res = jsonify(database.coauthors(id+"@nushigh.edu.sg"))
     return res
 
 @app.route('/')

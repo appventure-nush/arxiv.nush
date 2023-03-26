@@ -36,12 +36,12 @@ class Database:
     def close(self):
         self.connection.close()
         
-    def isStudent(self, sid):
-        return len(self.queryAll("SELECT email FROM NUSHStudent WHERE nush_sid = %s", (sid, ))) > 0
+    def isStudent(self, email):
+        return len(self.queryAll("SELECT email FROM Student WHERE email = %s", (email, ))) > 0
         
-    def student(self, sid):
-        query = "SELECT Student.email, name, gradYear, nush_sid, pfp, pwd FROM NUSHStudent INNER JOIN Student WHERE NUSHStudent.nush_sid = %s AND NUSHStudent.email = Student.email"
-        return self.queryOne(query, (sid, ))
+    def student(self, email):
+        query = "SELECT email, name, gradYear, nush_sid, pfp FROM NUSHStudent NATURAL JOIN Student WHERE email = %s"
+        return self.queryOne(query, (email, ))
     
     def teacher(self, email):
         return self.queryOne("SELECT * FROM Institution WHERE email = %s", (email, ))
@@ -61,6 +61,5 @@ class Database:
     
     def coauthors(self, email):
         query = "SELECT distinct other.studentEmail email FROM Works_On self, Works_On other WHERE self.pcode = other.pcode AND self.studentEmail = %s AND other.studentEmail <> self.studentEmail"
-        
         return [self.student(i["email"]) for i in self.queryAll(query, (email,)) if self.isStudent(i["email"])]
         
