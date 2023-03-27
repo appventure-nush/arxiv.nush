@@ -21,16 +21,25 @@ def student(id):
     res = jsonify(database.student(email))
     return res
 
-@app.route("/teacher", methods=["GET"])
-def teacher():
-    email = request.args.get("email", "nhscsp@nushigh.edu.sg", str)
+@app.route("/teacher/<email>", methods=["GET"])
+def teacher(email):
+    email = "nhscsp@nushigh.edu.sg" if email == "" else email
+    # email = request.args.get("email", "nhscsp@nushigh.edu.sg", str)
     res = jsonify(database.teacher(email))
     return res
 
-@app.route("/institute", methods=["GET"])
-def institute():
-    id = request.args.get("id", "NUS", str)
+
+@app.route("/institute/<id>", methods=["GET"])
+def institute(id):
+    id = "NUS" if id == "" else id
     res = jsonify(database.institute(id))
+    return res
+
+
+@app.route("/project/<pcode>", methods=["GET"])
+def project(pcode):
+    pcode = "23.018.NUSH.CS" if pcode == "" else pcode
+    res = jsonify(database.project(pcode))
     return res
 
 @app.route("/authors/<pcode>", methods=["GET"])
