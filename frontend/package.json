@@ -10,11 +10,15 @@
   },
   "dependencies": {
     "@mdi/font": "7.0.96",
+    "axios": "^1.3.4",
     "core-js": "^3.8.3",
+    "moment": "^2.29.4",
     "pinia": "^2.0.23",
     "roboto-fontface": "*",
+    "scrollreveal": "^4.0.9",
     "vue": "^3.2.13",
     "vue-router": "^4.0.0",
+    "vue-scroll-reveal": "github:tserkov/vue-scroll-reveal#v2",
     "vuetify": "^3.0.0",
     "webfontloader": "^1.0.0"
   },

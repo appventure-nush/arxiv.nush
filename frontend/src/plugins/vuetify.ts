@@ -8,10 +8,18 @@
 import '@mdi/font/css/materialdesignicons.css'
 import 'vuetify/styles'
 
-// Composables
+// Imports
 import { createVuetify } from 'vuetify'
+import * as components from 'vuetify/components'
+import * as directives from 'vuetify/directives'
+import * as labs from 'vuetify/labs/components'
 
-// https://vuetifyjs.com/en/introduction/why-vuetify/#feature-guides
+// Icons
+import { fa } from 'vuetify/iconsets/fa'
+import { md } from 'vuetify/iconsets/md'
+import { mdi } from 'vuetify/iconsets/mdi'
+import { mdi as mdiSvg } from 'vuetify/iconsets/mdi-svg'
+
 export default createVuetify({
   theme: {
     themes: {
@@ -23,4 +31,8 @@ export default createVuetify({
       },
     },
   },
+  components: {
+    ...components, ...labs,
+  },
+  directives
 })

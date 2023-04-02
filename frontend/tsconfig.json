@@ -27,5 +27,5 @@
     "src/**/*.tsx",
     "src/**/*.vue",
     "vite.config.ts"
-  ]
+, "src/api/ssef.js", "src/api/ssef.js"  ]
 }
