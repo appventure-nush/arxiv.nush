@@ -10,10 +10,10 @@ $ pip install -r requirements.txt
 $ python app.py
 ```
 
-### Client (Vue.js App)
+### Client (Vue 3 + TypeScript App)
 
 ```shell
-$ cd client
+$ cd frontend
 $ npm i
-$ npm run serve
+$ npm run dev
 ```
