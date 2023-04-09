@@ -1,3 +1,8 @@
+export class GeneralInstitute {
+  instId!: string
+  name!: string
+}
+
 export class Institute {
   instId!: string
   name!: string
@@ -6,4 +11,10 @@ export class Institute {
   isOrganiser!: boolean
   isPublisher!: boolean
   isSchool!: boolean
+}
+
+export class Job extends Institute {
+  dept!: string
+  role!: string
+  officeAddr!: string
 }
