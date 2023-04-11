@@ -1,4 +1,4 @@
-# Template of Flask Server and Vue.js App
+# arXiv.nush
 
 ## How to Run
 
