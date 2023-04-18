@@ -129,7 +129,7 @@ def stats(id):
     email = (("h1810124" if id == "" else id) + "@nushigh.edu.sg") if "@" not in id else id
     return jsonify({
         "projectStats": database.projectStats(email),
-        "submissionStats": database.projectStats(email),
+        "submissionStats": database.submissionStats(email),
         "awardStats": database.awardStats(email),
         "projectAwardStats": database.projectAwardStats(email)
     })

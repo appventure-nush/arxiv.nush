@@ -283,7 +283,7 @@ class Database:
             return
         
         if not self.ext_teacher(teacherEmail): # Teacher is not in
-            self.execute("INSERT INTO ExternalTeacher (email, name, schId) VALUES (%s,%s)", (teacherEmail, teacherName, instId))
+            self.execute("INSERT INTO ExternalTeacher (email, name, schId) VALUES (%s,%s, %s)", (teacherEmail, teacherName, instId))
         
         self.execute("INSERT INTO Student (email, name) VALUES (%s, %s)", (email, name))
         self.execute("INSERT INTO ExternalStudent (email, emergencyEmail) VALUES (%s, %s)", (email, teacherEmail))

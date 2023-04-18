@@ -223,6 +223,8 @@ if(appStore.user != null) {
       subStats.value = res.submissionStats
       awardStats.value = res.awardStats;
       projectAwardStats.value = res.projectAwardStats
+      console.log(res.projectStats)
+      console.log(res.submissionStats)
     }
   )
 }

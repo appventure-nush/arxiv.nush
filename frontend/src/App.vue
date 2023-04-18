@@ -72,6 +72,8 @@ import { useAppStore } from '@/store/app'
 import { Student } from './types/user';
 import { loadStudent } from './api/user';
 
+import {loadSidebarSubmissions} from "@/api/projects";
+
 
 /** Vuetify Theme */
 const theme = useTheme();
@@ -80,9 +82,12 @@ const appStore = useAppStore();
 
 const drawerShown: Ref<boolean> = ref(false)
 
+const hasSubmissions: Ref<boolean> = ref(false)
+
+
 
 const drawerRoutes = computed(() => {
-  return [
+  return hasSubmissions.value ? [
     {
       name: "Home",
       path: "/",
@@ -102,6 +107,18 @@ const drawerRoutes = computed(() => {
       name: "Submissions",
       path: "/submissions",
       icon: "mdi-trophy"
+    },
+
+  ] : [
+    {
+      name: "Home",
+      path: "/",
+      icon: "mdi-home",
+    },
+    {
+      name: "Projects",
+      path: "/projects",
+      icon: "mdi-flask"
     },
 
   ]
@@ -151,5 +168,7 @@ onMounted(() => {
   if('nush_sid' in (appStore.user ?? {})) {
     loadStudent((appStore.user as Student).nush_sid).then(res => appStore.user = res ?? appStore.user)
   }
+  loadSidebarSubmissions(appStore.userId).then(res => hasSubmissions.value = res.length != 0)
+
 })
 </script>

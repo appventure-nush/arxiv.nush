@@ -26,7 +26,7 @@
               <v-col cols='12' md="6">
                 <div class="d-flex">
                 <v-text-field label="Project Code" v-model="code"
-                  :rules="codeRules"
+                  :rules="codeRules" @update:model-value="computeSubject()"
                   hint="Code allocated to you (e.g. 23.NUSH.018.CS)" required></v-text-field>
                 <v-text-field label="Year" v-model="year"
                   :rules="yearRules"
@@ -34,7 +34,7 @@
                 <v-combobox
                     label="Department"
                     :items="['BI', 'CM', 'CS', 'EL', 'HU', 'MA', 'PH', 'RE']"
-                    clearable
+                    clearable @update:search="computedSubject = false"
                     v-model="deptSearch"
                   ></v-combobox>
                 </div>
@@ -182,6 +182,7 @@ export default defineComponent({
     appStore: useAppStore(),
     router: useRouter(),
     code: "",
+    computedSubject: false,
     year: (new Date()).getFullYear(),
     title: "",
     codeRules: [
@@ -235,6 +236,13 @@ export default defineComponent({
       this.value = false;
       this.submitLoading = false;
       this.router.push(`/projects/${this.code}`)
+    },
+    computeSubject() {
+      const subj = this.code.split(".")[this.code.replace(/[^.]/g, "").length].toUpperCase()
+      if(['BI', 'CM', 'CS', 'EL', 'HU', 'MA', 'PH', 'RE'].includes(subj) && (this.computedSubject || (this.deptSearch.length == 0))) {
+        this.deptSearch = subj;
+        this.computedSubject = true;
+      }
     }
   },
   async mounted() {
