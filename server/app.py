@@ -8,9 +8,6 @@ app.secret_key = "super_secret_key"
 CORS(app)
 database = Database(app)
 
-@app.route('/')
-def root_view():
-    return "Hello, World"
 
 # Authentication
 # ==================================================
