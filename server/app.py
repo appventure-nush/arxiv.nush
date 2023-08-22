@@ -10,7 +10,7 @@ database = Database(app)
 
 @app.route('/')
 def root_view():
-    return "Hello, World")
+    return "Hello, World"
 
 # Authentication
 # ==================================================
