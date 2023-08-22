@@ -9,4 +9,4 @@ RUN apt-get update \
 COPY ./server .
 RUN pip install -r requirements.txt
 
-CMD ["python", "-m", "app.py"]
+CMD ["python", "-m", "app"]
