@@ -2,7 +2,7 @@ from flask import Flask, request, jsonify
 from flask_cors import CORS
 from database import Database
 
-app = Flask(__name__,static_url_path='/dist')
+app = Flask(__name__,static_url_path='',static_folder='/dist')
 #app = Flask(__name__)
 app.secret_key = "super_secret_key"
 CORS(app)
