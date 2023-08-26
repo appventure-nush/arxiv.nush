@@ -10,7 +10,6 @@ RUN pwd && ls -l
 
 FROM nginx:alpine
 EXPOSE 80
-COPY . . 
 COPY --from=builder /dist /usr/share/nginx/html
 
 WORKDIR /server
