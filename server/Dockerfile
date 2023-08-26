@@ -6,7 +6,7 @@ RUN apt-get update \
 
 WORKDIR /frontend
 COPY . .
-RUN pwd && ls /frontend -l
+RUN cd frontend && pwd && ls /frontend -l
 
 FROM nginx:alpine
 EXPOSE 80
