@@ -24,6 +24,7 @@ jobs:
           cd frontend
           npm ci
           npm run build
+          ls .
       - name: Push image to AppVenture registry
         uses: docker/build-push-action@v1
         with:
