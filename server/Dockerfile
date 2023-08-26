@@ -1,16 +1,15 @@
-FROM nginx:3.9-slim-buster 
-EXPOSE 80
+FROM python:3.9-slim-buster as builder
 
 RUN apt-get update \
     && apt-get upgrade -y \
     && apt-get install -y gcc default-libmysqlclient-dev pkg-config
 
-WORKDIR /frontend
 COPY . .
 RUN pwd && ls -l
 
-
-COPY /dist /usr/share/nginx/html
+FROM nginx:alpine
+EXPOSE 80
+COPY --from=builder /dist /usr/share/nginx/html
 
 WORKDIR /server
 RUN pip install -r requirements.txt
