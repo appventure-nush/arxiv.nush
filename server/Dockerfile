@@ -6,12 +6,12 @@ RUN apt-get update \
 
 WORKDIR /frontend
 COPY . .
-RUN cd frontend && pwd && ls /frontend -l
+RUN cd frontend && pwd && ls -l
 
 FROM nginx:alpine
 EXPOSE 80
 COPY . . 
-COPY --from=builder /frontend/dist /usr/share/nginx/html
+COPY --from=builder /dist /usr/share/nginx/html
 
 WORKDIR /server
 RUN pip install -r requirements.txt
