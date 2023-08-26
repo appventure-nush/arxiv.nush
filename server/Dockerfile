@@ -9,7 +9,6 @@ RUN apt-get install -y nodejs
 WORKDIR /frontend
 
 COPY package.json .
-COPY package-lock.json .
 COPY . .
 RUN npm run build
 
