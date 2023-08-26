@@ -1,4 +1,5 @@
-FROM python:3.9-slim-buster as builder
+FROM nginx:alpine
+EXPOSE 80
 
 RUN apt-get update \
     && apt-get upgrade -y \
@@ -8,8 +9,7 @@ WORKDIR /frontend
 COPY . .
 RUN pwd && ls -l
 
-FROM nginx:alpine
-EXPOSE 80
+
 COPY --from=builder /dist /usr/share/nginx/html
 
 WORKDIR /server
