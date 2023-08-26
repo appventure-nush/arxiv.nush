@@ -4,9 +4,11 @@ RUN apt-get update \
     && apt-get upgrade -y \
     && apt-get install -y gcc default-libmysqlclient-dev pkg-config
 WORKDIR /frontend
+COPY . .
 
 FROM nginx:alpine
 EXPOSE 80
+COPY . . 
 COPY --from=builder /frontend/dist /usr/share/nginx/html
 
 WORKDIR /server
