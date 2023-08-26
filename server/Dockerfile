@@ -10,6 +10,7 @@ WORKDIR /frontend
 
 COPY /frontend/package.json .
 COPY /frontend .
+RUN npm ci
 RUN npm run build
 
 
