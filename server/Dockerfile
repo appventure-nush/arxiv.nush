@@ -4,7 +4,7 @@ RUN apt-get update \
     && apt-get upgrade -y \
     && apt-get install -y gcc default-libmysqlclient-dev pkg-config
 RUN curl -sL https://deb.nodesource.com/setup_12.x | bash - 
-RUN apt-get install -y nodejs npm
+RUN apt-get install -y nodejs npm git
 
 WORKDIR /frontend
 
