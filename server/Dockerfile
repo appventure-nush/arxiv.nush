@@ -8,8 +8,8 @@ RUN apt-get install -y nodejs
 
 WORKDIR /frontend
 
-COPY package.json .
-COPY . .
+COPY /frontend/package.json .
+COPY /frontend .
 RUN npm run build
 
 
