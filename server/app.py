@@ -2,7 +2,7 @@ from flask import Flask, request, jsonify
 from flask_cors import CORS
 from database import Database
 
-app = Flask(__name__,static_url_path='',static_folder='/dist')
+app = Flask(__name__)
 #app = Flask(__name__)
 app.secret_key = "super_secret_key"
 CORS(app)
@@ -360,4 +360,4 @@ def hello_world():
 
 
 if __name__ == '__main__':
-    app.run(host="0.0.0.0", port=5000, debug=True, ssl_context='adhoc')
+    app.run(host="0.0.0.0", port=5000, debug=True)
