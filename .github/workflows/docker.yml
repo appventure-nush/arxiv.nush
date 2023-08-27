@@ -33,4 +33,13 @@ jobs:
           password: ${{ secrets.DOCKER_PASSWORD }}
           registry: registry.nush.app
           repository: arxiv-nush
-          tags: latest
+          tags: backend
+      - name: Push image to AppVenture registry
+        uses: docker/build-push-action@v1
+        with:
+          dockerfile: frontend/Dockerfile
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
+          registry: registry.nush.app
+          repository: arxiv-nush
+          tags: frontend
