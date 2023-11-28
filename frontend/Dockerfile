@@ -1,9 +1,4 @@
-FROM busybox:musl
-
-RUN adduser -D static
-USER static
-WORKDIR /home/static
-
-COPY /dist .
-EXPOSE 3000
-CMD ["busybox", "httpd", "-f", "-v", "-p", "3000"]
+FROM nginx:alpine-slim
+EXPOSE 80
+COPY nginx.conf /etc/nginx/nginx.conf
+COPY dist /usr/share/nginx/html
