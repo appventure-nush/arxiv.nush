@@ -64,7 +64,7 @@
           ><br /><br />
 
           <div v-if="appStore.loggedIn">
-            <v-btn color="primary" size="x-large" href="/projects">
+            <v-btn color="primary" size="x-large" @click="router.push('/projects')">
               Let's go!
             </v-btn>
           </div>
