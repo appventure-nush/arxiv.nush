@@ -1,6 +1,6 @@
 <template>
 <v-container fluid
-    style="background: url('/src/assets/books.jpg') no-repeat center center fixed !important; background-size: cover"
+    :style="{background: `url(${booksUrl}), no-repeat center center fixed !important`, backgroundSize: `cover`}"
   >
   <section align="center"
       justify="center" :height="height" style="fill-height:100%; margin-top:30vh;">
@@ -210,6 +210,8 @@
 </template>
 
 <script lang="ts" setup>
+import booksUrl from '@/assets/books.jpg'
+
 import {
   ref,
   type Ref,
@@ -288,8 +290,9 @@ onMounted(() => {
 </script>
 
 <style scoped>
+
 .onboarding {
-  background: url('/src/assets/books.jpg') no-repeat center center fixed !important;
+  background: url(booksUrl) no-repeat center center fixed !important;
   background-size: cover;
   /* background-image: url('/src/assets/books.jpg'); */
   color: white;
