@@ -15,31 +15,31 @@ jobs:
         node-version: [16.x]
 
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
       - name: Use Node.js ${{ matrix.node-version }}
-        uses: actions/setup-node@v1
+        uses: actions/setup-node@v4
         with:
           node-version: ${{ matrix.node-version }}
       - run: |
           cd frontend
           npm ci
           npm run build
-          mv dist ..
-      - name: Push image to AppVenture registry
-        uses: docker/build-push-action@v1
+          mv dist .
+      - name: Login to AppVenture registry
+        uses: docker/login-action@v3
         with:
-          dockerfile: server/Dockerfile
+          registry: registry.nush.app
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
-          registry: registry.nush.app
-          repository: arxiv-nush
-          tags: backend
       - name: Push image to AppVenture registry
-        uses: docker/build-push-action@v1
+        uses: docker/build-push-action@v5
         with:
-          dockerfile: frontend/Dockerfile
-          username: ${{ secrets.DOCKER_USERNAME }}
-          password: ${{ secrets.DOCKER_PASSWORD }}
-          registry: registry.nush.app
-          repository: arxiv-nush
-          tags: frontend
+          context: server
+          push: true
+          tags: registry.nush.app/arxiv-nush:backend
+      - name: Push image to AppVenture registry
+        uses: docker/build-push-action@v5
+        with:
+          context: frontend
+          push: true
+          tags: registry.nush.app/arxiv-nush:frontend
