@@ -5,6 +5,7 @@ from database import Database
 app = Flask(__name__)
 #app = Flask(__name__)
 app.secret_key = "super_secret_key"
+app.config["APPLICATION_ROOT"] = '/api'
 CORS(app)
 database = Database(app)
 
