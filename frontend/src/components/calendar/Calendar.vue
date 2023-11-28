@@ -3,12 +3,12 @@
     <div class="w-full border grid grid-cols-7">
       <Top />
       <div
-        v-for="day in daysOfTheWeek" :key="day"
+        v-for="day in daysOfTheWeek"
+        :key="day"
         class="text-center text-sm md:text-base lg:text-lg font-semibold border"
       >
         {{ day.substring(0, 3) }}
       </div>
-
 
       <!-- <div v-if="firstDayOfCurrentMonth > 0"> -->
       <div
@@ -16,7 +16,7 @@
         :key="day"
         class="h-16 md:h-36 w-full border opacity-50"
       ></div>
-    <!-- </div> -->
+      <!-- </div> -->
       <div
         v-for="day in daysInCurrentMonth"
         :key="day"
@@ -29,14 +29,18 @@
             'hover:bg-gray-100 hover:text-gray-700': !isToday(day),
           }"
         >
-
-        <div v-if="isToday(day)" class="flex w-full justify-center items-center pt-1">
-          <div  class="h-6 w-6 flex justify-center items-center rounded-full shadow-sm" :class="{'bg-purple-600 text-white': isToday(day)}">
-              <h3 class="font-medium"> {{ day }} </h3>
+          <div
+            v-if="isToday(day)"
+            class="flex w-full justify-center items-center pt-1"
+          >
+            <div
+              class="h-6 w-6 flex justify-center items-center rounded-full shadow-sm"
+              :class="{ 'bg-purple-600 text-white': isToday(day) }"
+            >
+              <h3 class="font-medium">{{ day }}</h3>
             </div>
           </div>
           <div v-else>{{ day }}</div>
-
 
           <!-- <span>{{ day }}</span> -->
           <div
@@ -44,11 +48,15 @@
             :key="evt.id"
             class="hidden md:block"
           >
-          <!-- color="#ffcccb" -->
+            <!-- color="#ffcccb" -->
             <v-card
               class="w-full px-2 py-1 flex space-x-1 items-center whitespace-nowrap overflow-hidden cursor-pointer rounded-sm my-1"
               @click="togglePopover($event, evt)"
-              :class="{'bg-red-200': evt.conference, 'bg-blue-200': evt.competition}">
+              :class="{
+                'bg-red-200': evt.conference,
+                'bg-blue-200': evt.competition,
+              }"
+            >
               <div class="w-1/12">
                 <div class="h-2 w-2 rounded-full bg-purple-600"></div>
               </div>
@@ -66,7 +74,6 @@
             @click="openModal(day, allTodaysEvent(day, events))"
           >
             <div class="w-1/12">
-
               <svg
                 xmlns="http://www.w3.org/2000/svg"
                 fill="none"
@@ -86,7 +93,7 @@
               <h6
                 class="text-xs tracking-tight text-clip text-left overflow-hidden"
               >
-              {{ allTodaysEvent(day, events).length - 3 + " more events" }}
+                {{ allTodaysEvent(day, events).length - 3 + " more events" }}
               </h6>
             </div>
           </div>
@@ -112,44 +119,45 @@
         v-for="day in lastEmptyCells"
         :key="day"
         class="h-16 md:h-36 w-full border opacity-50"
-      ></div></div>
+      ></div>
+    </div>
 
-      <!-- mobile navigation -->
-      <div class="md:hidden col-span-7 flex justify-between items-center p-2">
-        <div>
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            fill="none"
-            viewBox="0 0 24 24"
-            stroke-width="1.5"
-            stroke="currentColor"
-            class="w-5 h-5 hover:text-gray-500 cursor-pointer hover:h-6 hover:w-6 transition-all"
-            @click="calendarStore.decrementMonth(1)"
-          >
-            <path
-              stroke-linecap="round"
-              stroke-linejoin="round"
-              d="M18.75 19.5l-7.5-7.5 7.5-7.5m-6 15L5.25 12l7.5-7.5"
-            />
-          </svg>
-        </div>
-        <div>
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            fill="none"
-            viewBox="0 0 24 24"
-            stroke-width="1.5"
-            stroke="currentColor"
-            class="w-5 h-5 hover:text-gray-500 cursor-pointer hover:h-6 hover:w-6 transition-all"
-            @click="calendarStore.incrementMonth(1)"
-          >
-            <path
-              stroke-linecap="round"
-              stroke-linejoin="round"
-              d="M11.25 4.5l7.5 7.5-7.5 7.5m-6-15l7.5 7.5-7.5 7.5"
-            />
-          </svg>
-        </div>
+    <!-- mobile navigation -->
+    <div class="md:hidden col-span-7 flex justify-between items-center p-2">
+      <div>
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          fill="none"
+          viewBox="0 0 24 24"
+          stroke-width="1.5"
+          stroke="currentColor"
+          class="w-5 h-5 hover:text-gray-500 cursor-pointer hover:h-6 hover:w-6 transition-all"
+          @click="calendarStore.decrementMonth(1)"
+        >
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            d="M18.75 19.5l-7.5-7.5 7.5-7.5m-6 15L5.25 12l7.5-7.5"
+          />
+        </svg>
+      </div>
+      <div>
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          fill="none"
+          viewBox="0 0 24 24"
+          stroke-width="1.5"
+          stroke="currentColor"
+          class="w-5 h-5 hover:text-gray-500 cursor-pointer hover:h-6 hover:w-6 transition-all"
+          @click="calendarStore.incrementMonth(1)"
+        >
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            d="M11.25 4.5l7.5 7.5-7.5 7.5m-6-15l7.5 7.5-7.5 7.5"
+          />
+        </svg>
+      </div>
       <!-- </div> -->
     </div>
   </div>
@@ -187,7 +195,7 @@ import Top from "@/components/calendar/Top.vue";
 import Modal from "@/components/calendar/EventsModal.vue";
 import { useCalendarStore } from "@/store/calendar";
 import { usePopover } from "@/composables/popover";
-import { Event } from "@/types/calendar"
+import { Event } from "@/types/calendar";
 
 /**************************************
  * PROPS
@@ -236,7 +244,7 @@ const getDaysInMonth = () => {
   daysInCurrentMonth.value = new Date(
     calendarStore.getYear,
     calendarStore.getMonth + 1,
-    0
+    0,
   ).getDate();
 };
 
@@ -248,7 +256,7 @@ const getFirstDayOfMonth = () => {
   firstDayOfCurrentMonth.value = new Date(
     calendarStore.getYear,
     calendarStore.getMonth,
-    1
+    1,
   ).getDay();
 };
 

@@ -67,7 +67,8 @@
 
             <div class="w-full mt-5">
               <div
-                v-for="event in events" :key="event.id"
+                v-for="event in events"
+                :key="event.id"
                 @click="eventClick($event, event)"
                 class="w-full px-1 md:px-4 py-2 md:py-4 flex space-x-3 md:space-x-5 items-center cursor-pointer border lg:border-none rounded hover:shadow-md hover:bg-slate-300 transition-colors"
               >
@@ -178,10 +179,10 @@ const eventClick = (evt: any, event: Event) => {
 // Component state
 const modalDate = ref(new Date());
 const modalWeekDay = computed(() =>
-  new Intl.DateTimeFormat("en-US", { weekday: "long" }).format(modalDate.value)
+  new Intl.DateTimeFormat("en-US", { weekday: "long" }).format(modalDate.value),
 );
 const modalShortMonth = computed(() =>
-  new Intl.DateTimeFormat("en-US", { month: "short" }).format(modalDate.value)
+  new Intl.DateTimeFormat("en-US", { month: "short" }).format(modalDate.value),
 );
 
 /**

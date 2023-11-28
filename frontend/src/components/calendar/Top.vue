@@ -6,7 +6,9 @@
         <div
           class="w-full inline-flex space-x-1 text-sm md:text-xl lg:text-2xl text-left font-bold md:font-semibold"
         >
-          <span class="md:hidden">{{ calendarStore.monthStr.substring(0, 3) }}</span>
+          <span class="md:hidden">{{
+            calendarStore.monthStr.substring(0, 3)
+          }}</span>
           <span class="hidden md:block">{{ calendarStore.monthStr }}</span>
           <span>{{ calendarStore.getYear }}</span>
         </div>
@@ -93,8 +95,8 @@ function prepareMonths() {
     new Date(
       calendarStore.getYear,
       calendarStore.getMonth,
-      calendarStore.getDay
-    )
+      calendarStore.getDay,
+    ),
   );
   shortMonthStr.value = monthStr.value.substring(0, 3);
 }

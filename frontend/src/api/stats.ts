@@ -1,24 +1,24 @@
-import { API_URL } from "./api_constants"
+import { API_URL } from "./api_constants";
 
 export class YearlyAggregate {
-  year!: number
-  count!: number
+  year!: number;
+  count!: number;
 }
 
 export class ProjectAggregate {
-  pcode!: string
-  count!: number
-  title!: string
-  year!: number
+  pcode!: string;
+  count!: number;
+  title!: string;
+  year!: number;
 }
 
 export class Stats {
-  projectStats!: YearlyAggregate[]
-  submissionStats!: YearlyAggregate[]
-  awardStats!: YearlyAggregate[]
-  projectAwardStats!: ProjectAggregate[]
+  projectStats!: YearlyAggregate[];
+  submissionStats!: YearlyAggregate[];
+  awardStats!: YearlyAggregate[];
+  projectAwardStats!: ProjectAggregate[];
 }
 
 export async function getStats(id: string): Promise<Stats> {
-  return await (await fetch(`${API_URL}/stats/${id}`)).json()
+  return await (await fetch(`${API_URL}/stats/${id}`)).json();
 }

@@ -1,46 +1,60 @@
 <template>
-  <v-dialog
-    v-model="value"
-    persistent
-    fullscreen
-    width="100%"
-  >
+  <v-dialog v-model="value" persistent fullscreen width="100%">
     <v-card class="mx-auto pa-auto">
-
-  <v-toolbar color="primary">
-    <v-toolbar-title>
-      Create Research Event
-    </v-toolbar-title>
-    <v-spacer/>
-    <v-btn variant="text" icon="mdi-close" @click="value = false"></v-btn>
-  </v-toolbar>
+      <v-toolbar color="primary">
+        <v-toolbar-title> Create Research Event </v-toolbar-title>
+        <v-spacer />
+        <v-btn variant="text" icon="mdi-close" @click="value = false"></v-btn>
+      </v-toolbar>
       <div class="mx-4">
         <v-container fluid>
           <v-form fast-fail @submit.prevent>
             <v-row>
               <v-col cols="12" sm="12" md="8">
-                <v-text-field label="Event Name" v-model="eventName"
+                <v-text-field
+                  label="Event Name"
+                  v-model="eventName"
                   :rules="nameRules"
-                  hint="Insert Full Event Name" required></v-text-field>
+                  hint="Insert Full Event Name"
+                  required
+                ></v-text-field>
               </v-col>
               <v-col cols="12" sm="6" md="4">
                 <div class="d-flex">
-                <v-text-field label="Event Abbreviation" v-model="eventId"
-                  :rules="nameRules"
-                  hint="Insert Event Abbreviation" required></v-text-field>
-                <v-text-field label="Event Year" v-model="eventYear"
-                  :rules="numberRules"
-                  hint="Insert Event Year" required></v-text-field>
+                  <v-text-field
+                    label="Event Abbreviation"
+                    v-model="eventId"
+                    :rules="nameRules"
+                    hint="Insert Event Abbreviation"
+                    required
+                  ></v-text-field>
+                  <v-text-field
+                    label="Event Year"
+                    v-model="eventYear"
+                    :rules="numberRules"
+                    hint="Insert Event Year"
+                    required
+                  ></v-text-field>
                 </div>
               </v-col>
               <v-col cols="12" sm="6" md="4">
                 <v-select
-                  :items="formatOptions" label="Format" prepend-inner-icon="mdi-book-education-outline"
+                  :items="formatOptions"
+                  label="Format"
+                  prepend-inner-icon="mdi-book-education-outline"
                   hint="Format of Event"
-                  v-model="format" single-line persistent-hint required></v-select>
+                  v-model="format"
+                  single-line
+                  persistent-hint
+                  required
+                ></v-select>
               </v-col>
               <v-col cols="12" sm="6" md="4">
-                <VueDatePicker v-model="dates" :enable-time-picker="false" range></VueDatePicker>
+                <VueDatePicker
+                  v-model="dates"
+                  :enable-time-picker="false"
+                  range
+                ></VueDatePicker>
               </v-col>
               <v-col cols="12" sm="6" md="4">
                 <v-autocomplete
@@ -54,12 +68,10 @@
                   label="Select"
                   multiple
                   hide-selected
-                  return-object>
+                  return-object
+                >
                   <template v-slot:chip="{ props, item }">
-                    <v-chip
-                      v-bind="props"
-                      :text="item.raw.name"
-                    ></v-chip>
+                    <v-chip v-bind="props" :text="item.raw.name"></v-chip>
                   </template>
 
                   <template v-slot:item="{ props, item }">
@@ -71,15 +83,16 @@
                 </v-autocomplete>
               </v-col>
               <v-col cols="12" sm="6" md="4">
-
                 <v-autocomplete
                   v-model="eventType"
                   :items="eventTypeOptions"
-                  chips closable-chips
+                  chips
+                  closable-chips
                   hide-details
                   hide-no-data
                   hide-selected
-                  label="Competition Type" v-on:keydown.enter.prevent=""
+                  label="Competition Type"
+                  v-on:keydown.enter.prevent=""
                   multiple
                   single-line
                 ></v-autocomplete>
@@ -89,27 +102,36 @@
                   v-if="eventType.includes('Competition')"
                   v-model="awardTypes"
                   :items="[]"
-                  label="Award Types" v-on:keydown.enter.prevent=""
+                  label="Award Types"
+                  v-on:keydown.enter.prevent=""
                   multiple
-                  chips closable-chips
+                  chips
+                  closable-chips
                 ></v-combobox>
               </v-col>
               <v-col cols="12" sm="6" md="4">
-                <v-text-field label="Conference DOI (Optional)" v-model="confDoi"
+                <v-text-field
+                  label="Conference DOI (Optional)"
+                  v-model="confDoi"
                   v-if="eventType.includes('Conference')"
-                  hint="Conference DOI"></v-text-field>
+                  hint="Conference DOI"
+                ></v-text-field>
               </v-col>
               <v-col cols="12" v-model="about">
                 <MdEditor language="en-US" v-model="about"></MdEditor>
-
               </v-col>
               <v-col cols="12">
                 <v-card-actions>
                   <v-spacer></v-spacer>
-                  <v-btn :loading="submitLoading"
-                    color="primary" size="large"
-                    type="submit" @click="submit()"
-                    variant="elevated">Create</v-btn>
+                  <v-btn
+                    :loading="submitLoading"
+                    color="primary"
+                    size="large"
+                    type="submit"
+                    @click="submit()"
+                    variant="elevated"
+                    >Create</v-btn
+                  >
                 </v-card-actions>
               </v-col>
             </v-row>
@@ -118,44 +140,43 @@
       </div>
     </v-card>
   </v-dialog>
-
 </template>
 <script lang="ts">
-import { defineComponent } from 'vue'
-import { loadStudents } from '@/api/user'
-import { User } from '@/types/user'
-import fuzzysort from 'fuzzysort'
-import { searchOrganisers } from "@/api/institutes"
-import {GeneralInstitute} from "@/types/admin"
-import { addStudents } from "@/api/projects"
-import { sub } from 'date-fns'
+import { defineComponent } from "vue";
+import { loadStudents } from "@/api/user";
+import { User } from "@/types/user";
+import fuzzysort from "fuzzysort";
+import { searchOrganisers } from "@/api/institutes";
+import { GeneralInstitute } from "@/types/admin";
+import { addStudents } from "@/api/projects";
+import { sub } from "date-fns";
 
-import VueDatePicker from '@vuepic/vue-datepicker';
-import '@vuepic/vue-datepicker/dist/main.css'
-import { ResearchEvent } from '@/types/project'
-import {createEvent} from "@/api/events"
+import VueDatePicker from "@vuepic/vue-datepicker";
+import "@vuepic/vue-datepicker/dist/main.css";
+import { ResearchEvent } from "@/types/project";
+import { createEvent } from "@/api/events";
 
-import MdEditor from 'md-editor-v3';
-import 'md-editor-v3/lib/style.css';
+import MdEditor from "md-editor-v3";
+import "md-editor-v3/lib/style.css";
 
 export default defineComponent({
   // type inference enabled
   props: {
-    visible: { type: Boolean, required: true }
+    visible: { type: Boolean, required: true },
   },
   emits: {
-    'update:visible': null
+    "update:visible": null,
   },
   components: { VueDatePicker, MdEditor },
   computed: {
     value: {
       get(): boolean {
-        return this.visible
+        return this.visible;
       },
       set(value: boolean) {
-        this.$emit('update:visible', value)
-      }
-    }
+        this.$emit("update:visible", value);
+      },
+    },
   },
   data() {
     return {
@@ -166,7 +187,7 @@ export default defineComponent({
       formatOptions: ["Virtual", "IRL", "Hybrid"],
       eventTypeOptions: ["Competition", "Conference"],
       eventName: "",
-      eventYear: (new Date()).getFullYear(),
+      eventYear: new Date().getFullYear(),
       eventId: "",
       about: "",
       eventType: [],
@@ -178,21 +199,21 @@ export default defineComponent({
       isUpdating: false,
       nameRules: [
         (value: string | null) => {
-          if((value?.length ?? 0) >= 3) return true
-          return "The name should consider at least 3 characters."
-        }
+          if ((value?.length ?? 0) >= 3) return true;
+          return "The name should consider at least 3 characters.";
+        },
       ],
       numberRules: [
         (value: string) => {
-          if(value.match(/^[0-9]+$/)) return true;
-          return "Year should be numeric."
-        }
-      ]
-    }
+          if (value.match(/^[0-9]+$/)) return true;
+          return "Year should be numeric.";
+        },
+      ],
+    };
   },
   methods: {
     dateToString(date: Date) {
-      return `${date.getFullYear()}-${date.getMonth()+1}-${date.getDate()}`
+      return `${date.getFullYear()}-${date.getMonth() + 1}-${date.getDate()}`;
     },
     async submit() {
       this.submitLoading = true;
@@ -201,27 +222,40 @@ export default defineComponent({
         year: this.eventYear,
         name: this.eventName,
         start_date: this.dateToString(this.dates[0]),
-        end_date: this.dates.length > 1 ? this.dateToString(this.dates[1]) : this.dateToString(this.dates[0]),
+        end_date:
+          this.dates.length > 1
+            ? this.dateToString(this.dates[1])
+            : this.dateToString(this.dates[0]),
         format: this.format,
         about: this.about,
         isCompetition: this.eventType.includes("Competition"),
         isConference: this.eventType.includes("Conference"),
-        organisers: this.searchedOrganisers.map(it => it.instId),
+        organisers: this.searchedOrganisers.map((it) => it.instId),
         awardTypes: this.awardTypes,
         confDoi: this.confDoi,
-        submissions: []
-      }
+        submissions: [],
+      };
       await createEvent(
-        this.eventId, this.eventYear, this.eventName, this.dateToString(this.dates[0]),
-        this.dates.length > 1 ? this.dateToString(this.dates[1]) : this.dateToString(this.dates[0]),
-        this.format, this.about, this.eventType.includes("Competition"), this.eventType.includes("Conference"),
-        this.searchedOrganisers.map(it => it.instId), this.awardTypes, this.confDoi
-      )
+        this.eventId,
+        this.eventYear,
+        this.eventName,
+        this.dateToString(this.dates[0]),
+        this.dates.length > 1
+          ? this.dateToString(this.dates[1])
+          : this.dateToString(this.dates[0]),
+        this.format,
+        this.about,
+        this.eventType.includes("Competition"),
+        this.eventType.includes("Conference"),
+        this.searchedOrganisers.map((it) => it.instId),
+        this.awardTypes,
+        this.confDoi,
+      );
       this.submitLoading = false;
-    }
+    },
   },
   async mounted() {
-    this.organisers = await searchOrganisers()
-  }
-})
+    this.organisers = await searchOrganisers();
+  },
+});
 </script>

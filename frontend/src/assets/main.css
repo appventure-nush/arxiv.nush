@@ -3,16 +3,16 @@
 @tailwind utilities;
 
 @layer base {
-    h1 {
-      @apply text-4xl;
-      @apply font-bold;
-    }
-    h2 {
-      @apply text-2xl;
-      @apply font-bold;
-    }
-    h3 {
-      @apply text-xl;
-      @apply font-bold;
-    }
+  h1 {
+    @apply text-4xl;
+    @apply font-bold;
   }
+  h2 {
+    @apply text-2xl;
+    @apply font-bold;
+  }
+  h3 {
+    @apply text-xl;
+    @apply font-bold;
+  }
+}

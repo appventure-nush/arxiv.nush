@@ -10,9 +10,11 @@ export const useCalendarStore = defineStore("calendar", () => {
   const getMonth = computed(() => month.value);
   const getDay = computed(() => day.value);
 
-  const monthStr = computed(() => new Intl.DateTimeFormat("en-US", { month: "long" }).format(
-    new Date(year.value, month.value, day.value)
-  ))
+  const monthStr = computed(() =>
+    new Intl.DateTimeFormat("en-US", { month: "long" }).format(
+      new Date(year.value, month.value, day.value),
+    ),
+  );
 
   function incrementYear(val: number) {
     year.value = year.value + val;

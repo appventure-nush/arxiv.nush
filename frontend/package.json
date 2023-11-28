@@ -6,7 +6,8 @@
     "dev": "vite",
     "build": "vite build",
     "preview": "vite preview",
-    "lint": "eslint . --fix --ignore-path .gitignore"
+    "lint": "eslint . --fix --ignore-path .gitignore",
+    "prettier": "prettier --write . --ignore-path .gitignore"
   },
   "dependencies": {
     "@azure/core-http": "^3.0.0",

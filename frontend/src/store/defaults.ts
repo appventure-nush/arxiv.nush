@@ -1,12 +1,11 @@
 // Utilities
-import { defineStore } from 'pinia'
-import {ref} from 'vue';
+import { defineStore } from "pinia";
+import { ref } from "vue";
 
-export const useDefaultsStore = defineStore('defaults', {
+export const useDefaultsStore = defineStore("defaults", {
   state: () => {
-    const prefCardView = ref(false)
-    return {prefCardView};
+    const prefCardView = ref(false);
+    return { prefCardView };
   },
-  actions: {
-  },
-})
+  actions: {},
+});
