@@ -1,6 +1,6 @@
 from flask import Flask, request, jsonify
 from flask_cors import CORS
-from database import Database
+from server.database_old import Database
 
 app = Flask(__name__)
 #app = Flask(__name__)

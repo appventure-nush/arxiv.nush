@@ -1,0 +1,13 @@
+Table "arxiv.works_on"
+    Column    |          Type          | Collation | Nullable |               Default                
+--------------+------------------------+-----------+----------+--------------------------------------
+ id           | bigint                 |           | not null | nextval('works_on_id_seq'::regclass)
+ studentemail | character varying(255) |           | not null | 
+ pcode        | character varying(20)  |           | not null | 
+Indexes:
+    "idx_16498_primary" PRIMARY KEY, btree (id)
+    "idx_16498_pcode" btree (pcode)
+    "idx_16498_studentemail" UNIQUE, btree (studentemail, pcode)
+Foreign-key constraints:
+    "works_on_ibfk_1" FOREIGN KEY (pcode) REFERENCES project(pcode) ON UPDATE CASCADE ON DELETE CASCADE
+    "works_on_ibfk_2" FOREIGN KEY (studentemail) REFERENCES student(email) ON UPDATE CASCADE ON DELETE CASCADE
