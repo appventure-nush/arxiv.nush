@@ -1,5 +1,5 @@
 from typing import Optional
-from sqlalchemy import ForeignKey, MetaData, UniqueConstraint, create_engine, Index
+from sqlalchemy import ForeignKey, MetaData, UniqueConstraint, create_engine, Index, label, select
 from sqlalchemy.sql.expression import false
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, relationship, sessionmaker
 from sqlalchemy.dialects.postgresql import BIGINT, VARCHAR, BOOLEAN, DATE, INTEGER, BYTEA
@@ -49,7 +49,7 @@ class ResearchEvent(Base):
     is_conference: Mapped[bool] = mapped_column("isconference", BOOLEAN, server_default=false(), default=False) 
     conf_doi: Mapped[Optional[str]] = mapped_column("confdoi", VARCHAR(200))
 
-    submissions: Mapped[list["Submission"]] = relationship(back_populates="event", cascade="all, delete-orphan", passive_deletes=True)
+    submissions: Mapped[list["ResearchEventSubmission"]] = relationship(back_populates="event", cascade="all, delete-orphan", passive_deletes=True)
     award_types: Mapped[list["AwardTypes"]] = relationship(back_populates="event", cascade="all, delete-orphan", passive_deletes=True)
     organisers: Mapped[list["Organises"]] = relationship(back_populates="event", cascade="all, delete-orphan", passive_deletes=True)
 
@@ -73,7 +73,7 @@ Referenced by:
     TABLE "accomplishment" CONSTRAINT "accomplishment_ibfk_1" FOREIGN KEY (subid) REFERENCES submission(subid) ON UPDATE CASCADE ON DELETE SET NULL
     TABLE "submits" CONSTRAINT "submits_ibfk_3" FOREIGN KEY (subid) REFERENCES submission(subid) ON UPDATE CASCADE ON DELETE CASCADE
 """
-class Submission(Base):
+class ResearchEventSubmission(Base):
     __tablename__ = 'submission'
 
     sub_id: Mapped[int] = mapped_column("subid", BIGINT, primary_key=True)
@@ -115,7 +115,7 @@ class Accomplishment(Base):
     prize: Mapped[Optional[str]] = mapped_column("prize", VARCHAR(100))
     sub_id: Mapped[Optional[int]] = mapped_column("subid", ForeignKey("submission.subid", name="accomplishment_ibfk_1", onupdate="CASCADE", ondelete="SET NULL"))
 
-    submission: Mapped[Submission] = relationship("Submission", back_populates="accomplishments")
+    submission: Mapped[ResearchEventSubmission] = relationship("ResearchEventSubmission", back_populates="accomplishments")
     publication: Mapped["Publication"] = relationship("Publication", back_populates="accomplishment", cascade="all, delete-orphan", passive_deletes=True)
 
     __table_args__ = (Index('idx_16386_subid', 'subid'),)
@@ -384,7 +384,7 @@ class Project(Base):
     p_code: Mapped[str] = mapped_column("pcode", VARCHAR(20), primary_key=True)
     title: Mapped[str] = mapped_column("title", VARCHAR(200))
     abstract: Mapped[Optional[str]] = mapped_column("abstract", VARCHAR(2000))
-    report_pdf: Mapped[Optional[bytes]] = mapped_column("reportpdf", BYTEA)
+    report_pdf_bytes: Mapped[Optional[bytes]] = mapped_column("reportpdf", BYTEA)
     year: Mapped[Optional[int]] = mapped_column("year", INTEGER)
     dept_id: Mapped[Optional[str]] = mapped_column("deptid", ForeignKey("department.deptid", name="project_ibfk_1", onupdate="CASCADE", ondelete="SET NULL"))
     teacher_email: Mapped[Optional[str]] = mapped_column("teacheremail", ForeignKey("nushteacher.email", name="project_ibfk_2", onupdate="CASCADE", ondelete="SET NULL"))
@@ -595,7 +595,7 @@ class Submits(Base):
 
     student: Mapped[Student] = relationship("Student", back_populates="submits")
     project: Mapped[Project] = relationship("Project", back_populates="submits")
-    submission: Mapped[Submission] = relationship("Submission", back_populates="submits")
+    submission: Mapped[ResearchEventSubmission] = relationship("ResearchEventSubmission", back_populates="submits")
 
     __table_args__ = (UniqueConstraint('studentemail', 'pcode', 'subid', name='idx_16486_studentemail_2'), Index('idx_16486_pcode', 'pcode'), Index('idx_16486_subid', 'subid'),)
 
@@ -660,3 +660,8 @@ class WorksOn(Base):
     __table_args__ = (UniqueConstraint('studentemail', 'pcode', name='idx_16498_studentemail'), Index('idx_16498_pcode', 'pcode'),)
 
 SessionLocal = sessionmaker(bind=engine, autocommit=False, autoflush=False)
+
+print(select(ResearchMentor)
+        .join(Mentors).join(Project)
+        .filter(Project.p_code == "a")
+        .order_by(ResearchMentor.email))

@@ -1,7 +1,9 @@
 import base64
+from datetime import date
+from typing import Collection, Optional, Sequence
 
-from sqlalchemy import select, union, update
-from util import remove_nulls
+from sqlalchemy import label, select, tuple_, union, update
+from util import many_many_map, not_none, remove_nulls, first_from_bulk, search_index
 import random
 import itertools
 from sqlalchemy.orm import Session, Bundle
@@ -38,7 +40,6 @@ def student_login(db: Session, email: str, pwd: str) -> bool:
 def teacher_login(db: Session, email: str, pwd: str) -> bool:
     return db.execute(select(models.NUSHTeacher).filter(models.NUSHTeacher.email == email, models.NUSHTeacher.pwd == pwd)).first() != None
     
-# FIXME
 def login(db: Session, email: str, password: str) -> schemas.LoginResult:
     is_student = is_nush_student(db, email)
     
@@ -110,7 +111,7 @@ def register_teacher(
 
 def change_password(db: Session, email: str, old_pwd: str, new_pwd: str) -> schemas.ChangePasswordResult:
     union_std_tcr = union(select(models.NUSHTeacher.email, models.NUSHTeacher.pwd), select(models.NUSHStudent.email, models.NUSHStudent.pwd)).subquery()
-    stmt = select(union_std_tcr).where(union_std_tcr.c.email == "h1910090@nushigh.edu.sg")
+    stmt = select(union_std_tcr).where(union_std_tcr.c.email == email)
     pwd_in_db = db.execute(stmt).one().pwd
 
     if(old_pwd != pwd_in_db):
@@ -123,166 +124,406 @@ def change_password(db: Session, email: str, old_pwd: str, new_pwd: str) -> sche
     
     return schemas.ChangePasswordResult(response="Success!")
     
-
-    
 # ==================================== GETTER FUNCTIONALITY ====================================
 
-def get_institution(db: Session, inst_id: str) -> models.Institution | None:
-    return db.execute(select(models.Institution).filter(models.Institution.inst_id == inst_id)).scalar_one_or_none()
+# every getter has 2 versions:
+# bulk_get - bulk gets schema. returns lists of tuple of (input, schema)
+# get - returns schema for 1 item. Internally uses bulk_get.
 
-def get_nush_teacher_raw(db: Session, email: str) -> models.NUSHTeacher | None:
-    return db.execute(select(models.NUSHTeacher).filter(models.NUSHTeacher.email == email)).scalar_one_or_none()
+# == Institution ==
+
+def bulk_get_institutions(db: Session, inst_ids: Collection[str]) -> list[tuple[str, schemas.Institution]]:
+    return [
+        (inst.inst_id, schemas.Institution.model_validate(inst)) 
+        for inst in db.scalars(
+            select(models.Institution).filter(models.Institution.inst_id.in_(inst_ids))
+    )]
+
+def get_institution(db: Session, inst_id: str) -> schemas.Institution | None:
+    return first_from_bulk(bulk_get_institutions(db, [inst_id]))
+
+# == NUSH Teacher ==
+
+def bulk_get_nush_teachers(db: Session, emails: Collection[str]) -> list[tuple[str, schemas.NUSHTeacher]]:
+    res: list[tuple[str, schemas.NUSHTeacher]] = []
+
+    for teacher in db.scalars(select(models.NUSHTeacher).filter(models.NUSHTeacher.email.in_(emails))):
+        pfp = base64.b64encode(teacher.pfp_bytes).decode("ascii") if teacher.pfp_bytes != None else ""
+        ret_teacher = schemas.NUSHTeacher.model_validate(teacher)
+        ret_teacher.pfp = pfp
+        res.append((teacher.email, ret_teacher))
+
+    return res
 
 def get_nush_teacher(db: Session, email: str) -> schemas.NUSHTeacher | None:
-    teacher = get_nush_teacher_raw(db, email)
-    if not teacher: return None
-    pfp = base64.b64encode(teacher.pfp_bytes).decode("ascii") if teacher.pfp_bytes != None else ""
-    ret_teacher = schemas.NUSHTeacher.model_validate(teacher)
-    ret_teacher.pfp = pfp
-    return ret_teacher
+    return first_from_bulk(bulk_get_nush_teachers(db, [email]))
 
-def get_ext_teacher(db: Session, email: str) -> models.ExternalTeacher | None:
-    return db.execute(select(models.ExternalTeacher).filter(models.ExternalTeacher.email == email)).scalar_one_or_none()
+# == External Teacher ==
 
-def get_teacher(db: Session, email: str) -> models.NUSHTeacher | models.ExternalTeacher | None:
-    if(is_nush_teacher(db, email)): return get_nush_teacher_raw(db, email)
-    else: return get_ext_teacher(db, email)
+def bulk_get_ext_teachers(db: Session, emails: Collection[str]) -> list[tuple[str, schemas.ExternalTeacher]]:
+    return [(teacher.email, schemas.ExternalTeacher.model_validate(teacher)) for teacher in db.scalars(select(models.ExternalTeacher).filter(models.ExternalTeacher.email.in_(emails)))]
 
-def get_nush_student_raw(db: Session, email: str) -> models.NUSHStudent | None:
-    return db.execute(select(models.NUSHStudent).filter(models.NUSHStudent.email == email)).scalar_one_or_none()
+def get_ext_teacher(db: Session, email: str) -> schemas.ExternalTeacher | None:
+    return first_from_bulk(bulk_get_ext_teachers(db, [email]))
+
+# == Any Teacher ==
+
+def bulk_get_teachers(db: Session, email: Collection[str]) -> list[tuple[str, schemas.NUSHTeacher | schemas.ExternalTeacher]]:
+    res: list[tuple[str, schemas.NUSHTeacher | schemas.ExternalTeacher]] = []
+    res.extend(bulk_get_nush_teachers(db, email))
+    res.extend(bulk_get_ext_teachers(db, email)) # assume there's no overlap
+    return res
+                                                                                          
+def get_teacher(db: Session, email: str) -> schemas.NUSHTeacher | schemas.ExternalTeacher | None:
+    return first_from_bulk(bulk_get_teachers(db, [email]))
+
+# == NUSH Student ==
+
+def bulk_get_nush_students(db: Session, emails: Collection[str]) -> list[tuple[str, schemas.NUSHStudent]]:
+    res: list[tuple[str, schemas.NUSHStudent]] = []
+
+    for student in db.scalars(select(models.NUSHStudent).filter(models.NUSHStudent.email.in_(emails))):
+        pfp = base64.b64encode(student.pfp_bytes).decode("ascii") if student.pfp_bytes != None else ""
+        ret_student = schemas.NUSHStudent.model_validate(student)
+        ret_student.pfp = pfp
+        res.append((student.email, ret_student))
+
+    return res
 
 def get_nush_student(db: Session, email: str) -> schemas.NUSHStudent | None:
-    student = get_nush_student_raw(db, email)
-    if not student: return None
-    pfp = base64.b64encode(student.pfp_bytes).decode("ascii") if student.pfp_bytes != None else ""
-    ret_student = schemas.NUSHStudent.model_validate(student)
-    ret_student.pfp = pfp
-    return ret_student
+    return first_from_bulk(bulk_get_nush_students(db, [email]))
+
+# == External Student ==
+
+def bulk_get_ext_students(db: Session, emails: Collection[str]) -> list[tuple[str, schemas.ExternalStudent]]:
+    stmt = (
+        select(
+            models.ExternalStudent.email, 
+            models.ExternalStudent.emergency_email,
+            models.Student.name,
+        )
+        .join(models.Student)
+        .filter(models.ExternalStudent.email.in_(emails))
+    )
+    external_students = db.execute(stmt).all()
+
+    external_teacher_emails = [s.emergency_email for s in external_students if s.emergency_email is not None]
+    external_teachers = dict(bulk_get_ext_teachers(db, external_teacher_emails))
+
+    res: list[tuple[str, schemas.ExternalStudent]] = [(row.email, schemas.ExternalStudent.model_validate(row)) for row in external_students]
+
+    for _, student in res:
+        if student.emergency_email is not None and student.emergency_email in external_teachers:
+            student.teacher_name = external_teachers[student.emergency_email].name
+            student.sch_id = external_teachers[student.emergency_email].sch_id
+
+    return res
 
 def get_ext_student(db: Session, email: str) -> schemas.ExternalStudent | None:
-    stmt = select(models.ExternalStudent, models.Student, models.ExternalTeacher).join(models.Student).join(models.ExternalTeacher).filter(models.ExternalStudent.email == email)
-    row = db.execute(stmt).one_or_none()
-    if not row:
-        return None
+    return first_from_bulk(bulk_get_ext_students(db, [email]))
 
-    # we want the external teacher email and name + the institution
-    return schemas.ExternalStudent(
-        email=row.ExternalStudent.email,
-        name=row.Student.name,
-        emergency_email=row.ExternalStudent.emergency_email,
-        teacher_name=row.ExternalTeacher.name,
-        sch_id=row.ExternalTeacher.sch_id
-    )
+# == Any Student ==
+
+def bulk_get_students(db: Session, emails: Collection[str]) -> list[tuple[str, schemas.NUSHStudent | schemas.ExternalStudent]]:
+    res: list[tuple[str, schemas.NUSHStudent | schemas.ExternalStudent]] = []
+    res.extend(bulk_get_nush_students(db, emails))
+    res.extend(bulk_get_ext_students(db, emails)) # assume there's no overlap
+    return res
 
 def get_student(db: Session, email: str) -> schemas.NUSHStudent | schemas.ExternalStudent | None:
-    return get_nush_student(db, email) if is_nush_student(db, email) else get_ext_student(db, email)
-    
-def get_mentor(db: Session, email: str) -> schemas.ResearchMentor | None:
-    mentor = db.execute(select(models.ResearchMentor).filter(models.ResearchMentor.email == email)).scalar_one_or_none()
-    if not mentor:
-        return None
-    return schemas.ResearchMentor(
-        email=mentor.email,
-        name=mentor.name,
-        jobs=[schemas.WorksAt.model_validate(job) for job in mentor.workplaces]
+    return first_from_bulk(bulk_get_students(db, [email]))
+
+# == Research Mentor ==
+
+def bulk_get_mentors(db: Session, emails: Collection[str]) -> list[tuple[str, schemas.ResearchMentor]]:
+    stmt = (
+        select(models.ResearchMentor, models.WorksAt)
+        .join(models.WorksAt)
+        .filter(models.ResearchMentor.email.in_(emails))
     )
 
-def event(self, eventId, year):
-    query = "SELECT * FROM ResearchEvent WHERE eventId=%s AND year=%s"
-    event = queryOne(query, (eventId, year))
-    event["awardTypes"] = [i["awardType"] for i in queryAll("SELECT awardType FROM AwardTypes WHERE eventId=%s AND year=%s", (eventId, year))] if(event["isCompetition"]) else []
-    instIds = queryAll("SELECT instId FROM Organises WHERE eventId = %s and year = %s", (eventId, year))
-    event["organisers"] = [get_institution(instId["instId"]) for instId in instIds]
-    event["submissions"] = submissions(eventId, year)
-    return event
+    # collect them together
+    last_mentor: Optional[models.ResearchMentor] = None
+    res: list[tuple[str, schemas.ResearchMentor]] = []
+    for row in db.execute(stmt):
+        if last_mentor != row.ResearchMentor:
+            last_mentor = row.ResearchMentor
+            assert last_mentor != None
+            res.append((last_mentor.email, schemas.ResearchMentor(
+                email=last_mentor.email,
+                name=last_mentor.name,
+                jobs=[]
+            )))
+        res[-1][1].jobs.append(schemas.WorksAt.model_validate(row.WorksAt))
 
-def project(self, pcode):
-    # print(pcode)
-    project = queryOne("SELECT * FROM Project WHERE pcode = %s", (pcode, ))
-    if not project: return None
-    # print(project)
-    project["members"] = projectMembers(pcode)
-    project["teacher"] = get_nush_teacher(project["teacherEmail"])
-    project["reportPdf"] = base64.b64encode(project.get("reportPdf", b'')).decode("utf-8") if project.get("reportPdf", b'') != None else ""
-    project["mentors"] = mentorsByProject(pcode)
-    del project["teacherEmail"]
-    return project
+    return res
 
-def submission(self, eventId, year, code):
-    event = queryOne("SELECT name, about, isCompetition, isConference, start_date, end_date FROM ResearchEvent WHERE eventId = %s AND year = %s", (eventId, year, ))
-    submission = queryOne("SELECT * FROM Submission where eventId=%s AND year=%s AND code=%s", (eventId, year, code))    # returns None if no match found.
-    if not(submission): return submission
-    pcodes  = queryAll("SELECT distinct pcode FROM Submits where eventId=%s AND year=%s AND code=%s", (eventId, year, code))
-    submission["projects"] = remove_nulls([project(pcode["pcode"]) for pcode in pcodes if pcode])
-    authors = queryAll("SELECT distinct studentEmail FROM Submits where eventId=%s AND year=%s AND code=%s", (eventId, year, code))
-    submission["members"] = remove_nulls([get_student(email["studentEmail"]) for email in authors if email])
-    submission["accs"] = accBySubmission(eventId, year, code)
-    return {**event, **submission}
+    
+def get_mentor(db: Session, email: str) -> schemas.ResearchMentor | None:
+    return first_from_bulk(bulk_get_mentors(db, [email]))
 
-def strongSubmissions(self, email):
-    query = "SELECT distinct eventId, year, code FROM Submits WHERE studentEmail = %s"
-    codes = remove_nulls(queryAll(query, (email, )))
-    return remove_nulls([submission(**kw) for kw in codes])
+# == Research Event ==
+
+def bulk_get_events(db: Session, event_ids: Collection[str], years: Collection[int]) -> list[tuple[int, schemas.ResearchEvent]]:
+    events = db.scalars(select(models.ResearchEvent).filter(tuple_(models.ResearchEvent.event_id, models.ResearchEvent.year).in_(zip(event_ids, years)))).all()
+    res: list[tuple[int, schemas.ResearchEvent]] = [(event.num_event_id, schemas.ResearchEvent.model_validate(event)) for event in events]
+
+    idx_map = {event.num_event_id: i for i, event in enumerate(events)}
+
+    # award types
+    for award in db.scalars(select(models.AwardTypes).filter(models.AwardTypes.num_event_id.in_(idx_map.keys()))):
+        res[idx_map[award.num_event_id]][1].award_types.append(award.award_type)
+
+    # institutions
+    stmt = (
+        select(models.Organises.inst_id, models.Organises.num_event_id)
+        .where(models.Organises.num_event_id.in_(idx_map.keys()))
+    )
+
+    inst_map = many_many_map(db.execute(stmt).tuples().all()) # inst_id -> [num_event_id]
+
+    for inst_id, institution in bulk_get_institutions(db, inst_map.keys()):
+        for num_event_id in inst_map[inst_id]:
+            res[idx_map[num_event_id]][1].organisers.append(institution)
+
+    # submissions
+    stmt = (
+        select(models.ResearchEventSubmission.sub_id, models.ResearchEventSubmission.num_event_id)
+        .filter(models.ResearchEventSubmission.num_event_id.in_(idx_map.keys()))
+    )
+
+    sub_map = many_many_map(db.execute(stmt).tuples().all()) # sub_id -> [num_event_id]
+
+    for sub_id, submission in bulk_get_submissions_by_sub_id(db, sub_map.keys()):
+        for num_event_id in sub_map[sub_id]:
+            res[idx_map[num_event_id]][1].submissions.append(submission)
+
+    return res
+
+def get_event(db: Session, event_id: str, year: int) -> schemas.ResearchEvent | None:
+    return first_from_bulk(bulk_get_events(db, [event_id], [year]))
+
+# == Project ==
+
+def bulk_get_projects(db: Session, p_codes: Collection[str]) -> list[tuple[str, schemas.Project]]:
+    projects = db.scalars(select(models.Project).filter(models.Project.p_code.in_(p_codes))).all()
+    res: list[tuple[str, schemas.Project]] = [(project.p_code, schemas.Project.model_validate(project)) for project in projects]
+
+    idx_map = {project.p_code: i for i, project in enumerate(projects)}
+
+    # members
+    stmt = (
+        select(models.WorksOn.student_email, models.WorksOn.p_code)
+        .where(models.WorksOn.p_code.in_(idx_map.keys()))
+    )
+
+    member_map = many_many_map(db.execute(stmt).tuples().all()) # student_email -> [p_code]
+    students = bulk_get_students(db, member_map.keys())
+
+    for student_email, student in students:
+        for p_code in member_map[student_email]:
+            res[idx_map[p_code]][1].members.append(student)
+
+    # teacher
+    teacher_map = dict(bulk_get_nush_teachers(db, [project.teacher_email for project in projects if project.teacher_email]))
+
+    for project in projects:
+        if project.teacher_email and project.teacher_email in teacher_map:
+            res[idx_map[project.p_code]][1].teacher = teacher_map[project.teacher_email]
+
+    # report pdf
+    for project in projects:
+        if project.report_pdf_bytes:
+            res[idx_map[project.p_code]][1].report_pdf = base64.b64encode(project.report_pdf_bytes).decode("utf-8")
+
+    # mentors
+    stmt = (
+        select(models.ResearchMentor.email, models.Project.p_code)
+        .join(models.Mentors).join(models.Project)
+        .filter(models.Project.p_code.in_(idx_map.keys()))
+    )
+
+    mentor_map = many_many_map(db.execute(stmt).tuples().all()) # email -> [p_code]
+    mentors = bulk_get_mentors(db, mentor_map.keys())
+
+    for email, mentor in mentors:
+        for p_code in mentor_map[email]:
+            res[idx_map[p_code]][1].mentors.append(mentor)
+
+    return res
+
+
+def get_project(db: Session, p_code: str) -> schemas.Project | None:
+    return first_from_bulk(bulk_get_projects(db, [p_code]))
+
+# == Submission ==
+
+def bulk_get_submissions_by_sub_id(db: Session, ids: Collection[int]) -> list[tuple[int, schemas.ResearchEventSubmission]]:
+    submissions = db.execute(
+        select(models.ResearchEventSubmission, models.ResearchEvent)
+        .join(models.ResearchEvent)
+        .filter(models.ResearchEventSubmission.sub_id.in_(ids))
+    ).tuples().all()
+    res: list[tuple[int, schemas.ResearchEventSubmission]] = [
+        (sub[0].sub_id, 
+         schemas.ResearchEventSubmission(
+            sub_id=sub[0].sub_id,
+            num_event_id=sub[0].num_event_id,
+            code=sub[0].code,
+            sub_title=sub[0].sub_title,
+            sub_abstract=sub[0].sub_abstract,
+            event_id=sub[1].event_id,
+            year=sub[1].year,
+            name=sub[1].name,
+            about=sub[1].about,
+            is_conference=sub[1].is_conference,
+            is_competition=sub[1].is_competition,
+            start_date=sub[1].start_date,
+            end_date=sub[1].end_date,
+         )
+        ) for sub in submissions
+    ]
+
+    idx_map = {sub[0].sub_id: i for i, sub in enumerate(submissions)}
+
+    # projects
+    stmt = (
+        select(models.Submits.p_code, models.Submits.sub_id)
+        .filter(models.Submits.sub_id.in_(idx_map.keys()))
+    )
+
+    project_map = many_many_map(db.execute(stmt).tuples().all()) # p_code -> [sub_id]
+    projects = bulk_get_projects(db, project_map.keys())
+
+    for p_code, project in projects:
+        for sub_id in project_map[p_code]:
+            res[idx_map[sub_id]][1].projects.append(project)
+
+    # members
+    stmt = (
+        select(models.Submits.student_email, models.Submits.sub_id)
+        .filter(models.Submits.sub_id.in_(idx_map.keys()))
+    )
+
+    member_map = many_many_map(db.execute(stmt).tuples().all()) # student_email -> [sub_id]
+    students = bulk_get_students(db, member_map.keys())
+
+    for student_email, student in students:
+        for sub_id in member_map[student_email]:
+            res[idx_map[sub_id]][1].members.append(student)
+
+    # accomplishments
+    stmt = (
+        select(models.Accomplishment)
+        .join(models.ResearchEventSubmission)
+        .filter(models.ResearchEventSubmission.sub_id.in_(idx_map.keys()))
+    )
+
+    for acc in db.scalars(stmt):
+        if acc.sub_id:
+            res[idx_map[acc.sub_id]][1].accomplishments.append(schemas.Accomplishment.model_validate(acc))
+
+    return res
+
+def bulk_get_submissions(db: Session, event_ids: Collection[str], years: Collection[int], codes: Collection[str]) -> list[tuple[int, schemas.ResearchEventSubmission]]:
+    return bulk_get_submissions_by_sub_id(db, db.scalars(
+        select(models.ResearchEventSubmission.sub_id)
+        .join(models.ResearchEvent)
+        .filter(tuple_(models.ResearchEvent.event_id, models.ResearchEvent.year, models.ResearchEventSubmission.code).in_(zip(event_ids, years, codes)))
+    ).all())
+
+    
+def get_submission(db: Session, event_id: str, year: int, code: str):
+    return first_from_bulk(bulk_get_submissions(db, [event_id], [year], [code]))
+
+def get_submission_by_sub_id(db: Session, sub_id: int):
+    return first_from_bulk(bulk_get_submissions_by_sub_id(db, [sub_id]))
+
+def get_submissions_by_email(db: Session, email: str) -> list[schemas.ResearchEventSubmission]:
+    stmt = (
+        select(models.Submits.sub_id)
+        .where(models.Submits.student_email == email)
+    )
+    return list(zip(*bulk_get_submissions_by_sub_id(db, db.execute(stmt).scalars().all())))[1]
 
 
     
 # ==================================== CREATE FUNCTIONALITY ====================================
 
-def createExternalStudent(self, email, name, teacherEmail, teacherName, instId):
-    if get_nush_student(email): # Student is already in
+def create_external_student(db: Session, email: str, name: str, teacher_email: str, teacher_name: str, inst_id: str) -> None:
+    if get_nush_student(db, email): # Student is already in
         return
     
-    if not get_ext_teacher(teacherEmail): # Teacher is not in
-        execute("INSERT INTO ExternalTeacher (email, name, schId) VALUES (%s,%s, %s)", (teacherEmail, teacherName, instId))
+    if not get_ext_teacher(db, teacher_email): # Teacher is not in
+        db.add(models.ExternalTeacher(email=teacher_email, name=teacher_name, sch_id=inst_id))
     
-    execute("INSERT INTO Student (email, name) VALUES (%s, %s)", (email, name))
-    execute("INSERT INTO ExternalStudent (email, emergencyEmail) VALUES (%s, %s)", (email, teacherEmail))
+    db.add(models.ExternalStudent(email=email, emergency_email=teacher_email))
+    db.add(models.Student(email=email, name=name))
+    db.commit()
 
-def createSubmission(self, eventId, year, code, subTitle, subAbstract, pcodes, authorEmails):
-    # print(eventId, year, code)
-    query = "INSERT INTO Submission(eventId, year, code, subTitle, subAbstract) VALUES (%s, %s, %s, %s, %s)"
-    execute(query, (eventId, year, code, subTitle, subAbstract), commit=False)
-    # print(pcodes)
-    # print(authorEmails)
-    query = "INSERT INTO Submits(eventId, year, code, studentEmail, pcode) VALUES (%s, %s, %s, %s, %s)"
-    executemany(query, [
-        (eventId, year, code, email, pcode) for (email, pcode) in itertools.product(authorEmails, pcodes)
-    ])
-    return submission(eventId, year, code)
+def create_submission(db: Session, num_event_id: int, code: str, sub_title: str, sub_abstract: str, p_codes: Collection[str], author_emails: Collection[str]) -> schemas.ResearchEventSubmission:
+    submission = models.ResearchEventSubmission(
+        num_event_id=num_event_id,
+        code=code,
+        sub_title=sub_title,
+        sub_abstract=sub_abstract
+    )
 
-def createResearchEvent(
-    self, eventId, year, name, start_date, end_date,
-    format, about, isCompetition, isConference,
-    organisers, awardTypes, confDoi
-):
-    query = "INSERT INTO ResearchEvent(eventId, year, name, start_date, end_date, format, about, isCompetition, isConference, confDoi) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)"
-    execute(query, (
-        eventId, year, name, start_date, end_date,
-        format, about, isCompetition, isConference, confDoi
-    ), commit=False)
-    executemany("INSERT INTO AwardTypes(eventId, year, awardType) VALUES (%s, %s, %s)", [
-        (eventId, year, awardType) for awardType in awardTypes
-    ], commit=False)
-    executemany("INSERT INTO Organises(eventId, year, instId) VALUES (%s, %s, %s)", [
-        (eventId, year, instId) for instId in organisers
-    ])
-    return event(eventId, year)
+    db.add(submission)
+    db.commit()
+    db.refresh(submission)
 
-def createProject(
-    self, pcode, year, deptId, title, abstract, teacherEmail, authorEmails
-):
-    query = "INSERT INTO Project(pcode, year, deptId, title, abstract, teacherEmail) VALUES (%s, %s, %s, %s, %s, %s)"
-    execute(query, (
-        pcode, year, deptId, title, abstract, teacherEmail
-    ), commit=False)
-    executemany("INSERT INTO Works_On(studentEmail, pcode) VALUES (%s, %s)", [
-        (authorEmail, pcode) for authorEmail in authorEmails
+    db.add_all([
+        models.Submits(student_email=email, p_code=p_code, sub_id=submission.sub_id)
+        for email, p_code in itertools.product(author_emails, p_codes)
     ])
-    return project(pcode)
+    db.commit()
+
+    return not_none(get_submission_by_sub_id(db, submission.sub_id))
+
+def create_research_event(
+    db: Session, event_id: str, year: int, name: str, start_date: date, end_date: date,
+    format: str, about: str, is_competition: bool, is_conference: bool,
+    organisers: Collection[str], award_types: Collection[str], conf_doi: str
+) -> schemas.ResearchEvent:
+    event = models.ResearchEvent(
+        event_id=event_id, year=year, name=name, start_date=start_date, end_date=end_date,
+        format=format, about=about, is_competition=is_competition, is_conference=is_conference,
+        conf_doi=conf_doi
+    )
+    db.add(event)
+    db.commit()
+    db.refresh(event)
+    
+    db.add_all([
+        models.Organises(num_event_id=event.num_event_id, inst_id=inst_id)
+        for inst_id in organisers
+    ])
+    db.add_all([
+        models.AwardTypes(num_event_id=event.num_event_id, award_type=award_type)
+        for award_type in award_types
+    ])
+    db.commit()
+
+    return not_none(get_event(db, event_id, year))
+
+def create_project(
+    db: Session, p_code: str, year: int, dept_id: str, title: str, abstract: str, teacher_email: str, author_emails: Collection[str]
+) -> schemas.Project:
+    db.add(models.Project(
+        p_code=p_code, year=year, dept_id=dept_id, title=title, abstract=abstract, teacher_email=teacher_email
+    ))
+
+    db.add_all([
+        models.WorksOn(student_email=email, p_code=p_code)
+        for email in author_emails
+    ])
+    
+    return not_none(get_project(db, p_code))
 
 # ==================================== UPDATE FUNCTIONALITY ====================================
 
-def addStudentsToProject(self, emails, pcode):
+def add_students_to_project(self, emails, pcode):
     emails = [email for email in emails if not queryOne("SELECT studentEmail FROM Works_On WHERE studentEmail = %s AND pcode = %s", (email, pcode))]
     executemany("INSERT INTO Works_On (studentEmail, pcode) VALUES (%s, %s)", [(email, pcode) for email in emails])
 
@@ -298,7 +539,7 @@ def updateSubmission(self, eventId, year, code, subTitle, subAbstract):
     print(eventId, year, code)
     query = "UPDATE Submission SET subTitle = %s, subAbstract = %s WHERE eventId = %s AND year = %s AND code = %s"
     execute(query, (subTitle, subAbstract, eventId, year, code))
-    res = submission(eventId, year, code)
+    res = get_submission(eventId, year, code)
     print(res)
     print(repr(res))
     return res
@@ -321,19 +562,19 @@ def updateResearchEvent(
     executemany("INSERT INTO Organises(eventId, year, instId) VALUES (%s, %s, %s)", [
         (eventId, year, instId) for instId in organisers
     ])
-    return event(eventId, year)
+    return get_event(eventId, year)
 
 # ==================================== DELETE FUNCTIONALITY ====================================
 
 def removeStudentFromProject(self, email, pcode):
     query = "DELETE FROM Works_On WHERE studentEmail = %s AND pcode = %s"
     execute(query, (email, pcode, ))
-    return project(pcode)
+    return get_project(pcode)
 
 def removeStudentFromSubmission(self, email, eventId, year, code):
     query = "DELETE FROM Submits WHERE studentEmail = %s AND eventId = %s AND year = %s AND code = %s"
     execute(query, (email, eventId, year, code, ))
-    return submission(eventId, year, code)
+    return get_submission(eventId, year, code)
 
 def deleteProject(self, pcode):
     query = "DELETE FROM Project WHERE pcode = %s"
@@ -385,12 +626,12 @@ def events(self):
 def best_students(self, email):
     query = "SELECT studentEmail FROM Works_On NATURAL INNER JOIN Project WHERE teacherEmail = %s GROUP BY teacherEmail, studentEmail ORDER BY COUNT(studentEmail) DESC LIMIT 5"
     studentEmails = queryAll(query, (email, ))
-    return [get_student(email["studentEmail"]) for email in studentEmails]
+    return [get_students_by_email(email["studentEmail"]) for email in studentEmails]
 
 def teacherProjects(self, email):
     query = "SELECT pcode FROM Project WHERE teacherEmail = %s"
     pcodes = queryAll(query, (email, ))
-    return [project(pcode["pcode"]) for pcode in pcodes]
+    return [get_project(pcode["pcode"]) for pcode in pcodes]
 
 def extTeacherStudents(self, email):
     query = "SELECT email FROM ExternalStudent WHERE emergencyEmail = %s LIMIT 5"
@@ -422,7 +663,7 @@ def submissionsByProject(self, pcode):
         {
             **submission, 
             "members": [
-                get_student(i.get("studentEmail", ""))
+                get_students_by_email(i.get("studentEmail", ""))
                 for i in submission_query_pairs 
                 if i.get("eventId", "") == submission.get("eventId", "") 
                 and i.get("year", 0) == submission.get("year", 0) 
@@ -452,29 +693,24 @@ def submissionsByUser(self, email):
         }
         for submission in submissions
     ]
-    
-def mentorsByProject(self, pcode): 
-    query = "SELECT email FROM ResearchMentor INNER JOIN Mentors ON ResearchMentor.email = Mentors.mentorEmail WHERE pcode = %s"
-    emails = queryAll(query, (pcode, ))
-    return [get_mentor(email["email"]) for email in emails]
 
 
 def projectsByMentor(self, email):
     query = "SELECT pcode FROM ResearchMentor INNER JOIN Mentors ON ResearchMentor.email = Mentors.mentorEmail WHERE email = %s"
     pcodes = queryAll(query, (email, ))
-    return [project(pcode["pcode"]) for pcode in pcodes]
+    return [get_project(pcode["pcode"]) for pcode in pcodes]
 
 def mentorStudents(self, email):
     query = "SELECT studentEmail FROM Works_On NATURAL INNER JOIN Project NATURAL INNER JOIN Mentors WHERE mentorEmail = %s GROUP BY mentorEmail, studentEmail ORDER BY COUNT(studentEmail) DESC LIMIT 5"
     emails = queryAll(query, (email, ))
-    return [get_student(email["studentEmail"]) for email in emails]
+    return [get_students_by_email(email["studentEmail"]) for email in emails]
 
 def _processSub(self, eventId, year, sub):
     if not sub: return sub
     query = "SELECT distinct pcode FROM Submits WHERE eventId = %s and year = %s and code = %s"
     pcode = queryOne(query, (eventId, year, sub["code"]))
     pcode = pcode if pcode else dict(pcode="")
-    students = remove_nulls([get_student(email["studentEmail"]) for email in queryAll("SELECT distinct studentEmail FROM Submits WHERE eventId = %s and year = %s and code = %s", (eventId, year, sub["code"]))])
+    students = remove_nulls([get_students_by_email(email["studentEmail"]) for email in queryAll("SELECT distinct studentEmail FROM Submits WHERE eventId = %s and year = %s and code = %s", (eventId, year, sub["code"]))])
     return {**sub, **pcode, "members": students}
 
 def submissions(self, eventId, year):
@@ -486,20 +722,48 @@ def otherProjects(self, email):
     query = "SELECT pcode FROM Project p WHERE %s <> ALL (SELECT studentEmail FROM Works_On wo where wo.pcode = p.pcode)"
     pcodes = [i["pcode"] for i in queryAll(query, (email, ))]
     random.shuffle(pcodes)
-    return remove_nulls([project(pcode) for pcode in pcodes if pcode])
+    return remove_nulls([get_project(pcode) for pcode in pcodes if pcode])
 
 def otherEvents(self, email):
     query = "SELECT eventId, year FROM ResearchEvent re WHERE %s <> ALL (SELECT studentEmail FROM Submits s WHERE s.eventId = re.eventId AND s.year = re.year)"
     ids = queryAll(query, (email, ))
-    return remove_nulls([event(**id) for id in ids])
+    return remove_nulls([get_event(**id) for id in ids])
 
-def projectMembers(self, pcode):
-    query = "SELECT studentEmail email FROM Works_On WHERE pcode = %s"
-    return [get_nush_student(i["email"]) if is_nush_student(i["email"]) else get_ext_student(i["email"]) for i in queryAll(query, (pcode,))]
+def get_project_members(db: Session, p_code: str) -> list[schemas.ExternalStudent | schemas.NUSHStudent]:
+    res: list[schemas.ExternalStudent | schemas.NUSHStudent] = []
+
+    stmt = (
+        select(
+            models.ExternalStudent.email, 
+            models.ExternalStudent.emergency_email,
+            models.Student.name, 
+            label("teacher_name", models.ExternalTeacher.name),
+            models.ExternalTeacher.sch_id
+        ).join(models.Student).join(models.WorksOn).join(models.Project).join(models.ExternalTeacher)
+        .filter(models.Project.p_code == p_code)
+    )
+    
+    for row in db.execute(stmt):
+        res.append(schemas.ExternalStudent.model_validate(row))
+
+    stmt = (
+        select(
+            models.NUSHStudent
+        ).join(models.Student).join(models.WorksOn).join(models.Project).join(models.ExternalTeacher)
+        .filter(models.Project.p_code == p_code)
+    )
+
+    for student in db.scalars(stmt):
+        pfp = base64.b64encode(student.pfp_bytes).decode("ascii") if student.pfp_bytes != None else ""
+        student_ret = schemas.NUSHStudent.model_validate(student)
+        student_ret.pfp = pfp
+        res.append(student_ret)
+    
+    return res
 
 def studentProjects(self, email):
     pcodes = queryAll("SELECT pcode FROM Works_On WHERE studentEmail = %s", (email, ))
-    return remove_nulls([project(pcode["pcode"]) for pcode in pcodes])
+    return remove_nulls([get_project(pcode["pcode"]) for pcode in pcodes])
 
 def coauthors(self, email):
     query = "SELECT other.studentEmail email, COUNT(pcode) num FROM Works_On self, Works_On other WHERE pcode = other.pcode AND studentEmail = %s AND other.studentEmail <> studentEmail GROUP BY other.studentEmail ORDER BY COUNT(pcode) DESC LIMIT 5"
@@ -508,7 +772,7 @@ def coauthors(self, email):
 def projectByTeacher(self, email):
     query = "SELECT pcode FROM Project WHERE teacherEmail = %s"
     codes = queryAll(query, (email, ))
-    return [project(code) for code in codes]
+    return [get_project(code) for code in codes]
 
 def updateProject(self, pcode, title, abstract, reportPdf):
     # print(reportPdf)
@@ -516,7 +780,7 @@ def updateProject(self, pcode, title, abstract, reportPdf):
     # print(reportPdf)
     query = "UPDATE Project SET title = %s, abstract = %s, reportPdf = %s WHERE pcode = %s"
     execute(query, (title, abstract, reportPdf, pcode))
-    return project(pcode)
+    return get_project(pcode)
 
 def updateStudent(self, email, pfp, about):
     pfp = base64.b64decode(pfp) if pfp != None else "" # convert base64 to bytes object if needed.
